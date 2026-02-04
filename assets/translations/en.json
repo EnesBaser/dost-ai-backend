@@ -1,0 +1,167 @@
+{
+  "app": {
+    "name": "Dost AI",
+    "subtitle": "Your AI companion",
+    "loading": "Loading..."
+  },
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "start": "Start",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "edit": "Edit",
+    "close": "Kapat",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "send": "Send",
+    "search": "Search",
+    "today": "Today",
+    "this_week": "This Week",
+    "total": "Total"
+  },
+  "onboarding": {
+    "welcome_emoji": "👋",
+    "welcome_title": "Hello!",
+    "welcome_message": "I'm DostAI, your AI companion.\n\nI'd like to ask you a few questions to get to know you better.",
+    "name_question": "What's your name?",
+    "name_hint": "Type your name...",
+    "nickname_greeting": "Hello {name}! 👋",
+    "nickname_question": "How should I address you?",
+    "nickname_hint": "E.g: Buddy, Friend, Mr. {name}",
+    "nickname_skip": "If you leave it blank, I'll just call you \"{name}\"",
+    "interests_question": "What are your interests?",
+    "interests_subtitle": "To get to know you better",
+    "interests_skip": "You can skip this and add them later in profile settings",
+    "ready_title": "All set!",
+    "ready_message": "I'm ready to chat with you {name}!\n\nI'll always be here. 💜",
+    "interests": {
+      "tech": "Technology",
+      "sports": "Sports",
+      "music": "Music",
+      "movies": "Movies/TV",
+      "books": "Books",
+      "travel": "Travel",
+      "food": "Food",
+      "art": "Art",
+      "games": "Gaming",
+      "science": "Science"
+    }
+  },
+  "chat": {
+    "title": "Dost AI - {name}",
+    "empty_greeting": "Hello! I'm Dost AI.",
+    "input_hint": "Type your message...",
+    "listening": "Listening...",
+    "wake_word_active": "Wake Word Active",
+    "wake_word_inactive": "Wake Word Off",
+    "tts_active": "Voice Response Active",
+    "tts_inactive": "Voice Response Off"
+  },
+  "counter": {
+    "today": "Today",
+    "week": "This Week",
+    "total": "Total"
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "daily_reminders": "📱 Daily Reminders",
+    "daily_subtitle": "I'd love to chat with you regularly! When should I message you?",
+    "morning": "Morning Greeting",
+    "morning_subtitle": "Every morning at 09:00 ☀️",
+    "lunch": "Lunch Break",
+    "lunch_subtitle": "Every day at 13:00 🍽️",
+    "evening": "Evening Check-in",
+    "evening_subtitle": "Every evening at 20:00 🌙",
+    "appearance": "🎨 Appearance Settings",
+    "appearance_subtitle": "Customize the app's appearance",
+    "dark_mode": "Dark Mode",
+    "dark_mode_active": "Dark theme is currently active 🌙",
+    "light_mode_active": "Light theme is currently active ☀️",
+    "test_notification": "Send Test Notification",
+    "permission_required": "Notification permission required!",
+    "test_title": "Test Notification 🔔",
+    "test_body": "Notifications are working! I can message you now 💜",
+    "info": "Notifications will arrive at the same time every day. You can turn them off anytime!"
+  },
+"profile": {
+  "title": "Profile",
+  "membership": "Membership: {date}",
+  "my_interests": "My Interests",
+  "statistics": "Statistics",
+  "total_messages": "Total Messages",
+  "active_days": "Active Days",
+  "days_count": "{count} days",
+  "settings": "Settings",
+  "edit_profile": "Edit Profile",
+  "edit_profile_subtitle": "Update your name and interests",
+  "notifications": "Notifications",
+  "notifications_subtitle": "Manage notification settings",
+  "reset_profile": "Reset Profile",
+  "reset_profile_subtitle": "Delete all your data and start over",
+  "reset_confirm_title": "Reset Profile",
+  "reset_confirm_message": "Your profile information will be deleted and the onboarding screen will be shown again. Are you sure?",
+  "coming_soon": "Coming soon!",
+  "no_profile": "No profile information found"
+  },
+  "achievements": {
+  "title": "Achievements",
+  "title_emoji": "Achievements 🏆",
+  "unlocked": "✅ Unlocked",
+  "locked": "🔒 Locked",
+  "progress": "Overall Progress",
+  "completed": "{percent}% Completed",
+  "count": "{unlocked} / {total}",
+  
+  "msg_10": {
+    "title": "First Step",
+    "description": "Send 10 messages"
+  },
+  "msg_50": {
+    "title": "Chat Lover",
+    "description": "Send 50 messages"
+  },
+  "msg_100": {
+    "title": "Talkative",
+    "description": "Send 100 messages"
+  },
+  "msg_500": {
+    "title": "Chat Master",
+    "description": "Send 500 messages"
+  },
+  "streak_3": {
+    "title": "3 in a Row",
+    "description": "Use 3 days consecutively"
+  },
+  "streak_7": {
+    "title": "Week Warrior",
+    "description": "Use 7 days consecutively"
+  },
+  "streak_14": {
+    "title": "Two Weeks",
+    "description": "Use 14 days consecutively"
+  },
+  "streak_30": {
+    "title": "Monthly Hero",
+    "description": "Use 30 days consecutively"
+  },
+  "fav_1": {
+    "title": "First Favorite",
+    "description": "Favorite your first message"
+  },
+  "fav_10": {
+    "title": "Collection",
+    "description": "Favorite 10 messages"
+  },
+  "voice_first": {
+    "title": "Voice Try",
+    "description": "Use voice input for the first time"
+  },
+  "search_first": {
+    "title": "Searcher",
+    "description": "Search for the first time"
+  }
+}
+}

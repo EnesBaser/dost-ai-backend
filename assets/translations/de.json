@@ -1,0 +1,167 @@
+{
+  "app": {
+    "name": "Dost AI",
+    "subtitle": "Dein KI-Begleiter",
+    "loading": "Wird geladen..."
+  },
+  "common": {
+    "continue": "Weiter",
+    "back": "Zurück",
+    "start": "Start",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "send": "Senden",
+    "search": "Suchen",
+    "today": "Heute",
+    "this_week": "Diese Woche",
+    "total": "Gesamt"
+  },
+  "onboarding": {
+    "welcome_emoji": "👋",
+    "welcome_title": "Hallo!",
+    "welcome_message": "Ich bin DostAI, dein KI-Begleiter.\n\nIch möchte dir ein paar Fragen stellen, um dich besser kennenzulernen.",
+    "name_question": "Wie heißt du?",
+    "name_hint": "Gib deinen Namen ein...",
+    "nickname_greeting": "Hallo {name}! 👋",
+    "nickname_question": "Wie soll ich dich ansprechen?",
+    "nickname_hint": "Z.B.: Kumpel, Freund, Herr {name}",
+    "nickname_skip": "Wenn du es leer lässt, nenne ich dich einfach \"{name}\"",
+    "interests_question": "Was sind deine Interessen?",
+    "interests_subtitle": "Um dich besser kennenzulernen",
+    "interests_skip": "Du kannst dies überspringen und sie später hinzufügen",
+    "ready_title": "Alles bereit!",
+    "ready_message": "Ich bin bereit, mit dir zu chatten {name}!\n\nIch werde immer hier sein. 💜",
+    "interests": {
+      "tech": "Technologie",
+      "sports": "Sport",
+      "music": "Musik",
+      "movies": "Filme/TV",
+      "books": "Bücher",
+      "travel": "Reisen",
+      "food": "Essen",
+      "art": "Kunst",
+      "games": "Gaming",
+      "science": "Wissenschaft"
+    }
+  },
+  "chat": {
+    "title": "Dost AI - {name}",
+    "empty_greeting": "Hallo! Ich bin Dost AI.",
+    "input_hint": "Schreibe deine Nachricht...",
+    "listening": "Höre zu...",
+    "wake_word_active": "Aktivierungswort Aktiv",
+    "wake_word_inactive": "Aktivierungswort Aus",
+    "tts_active": "Sprachantwort Aktiv",
+    "tts_inactive": "Sprachantwort Aus"
+  },
+  "counter": {
+    "today": "Heute",
+    "week": "Diese Woche",
+    "total": "Gesamt"
+  },
+  "notifications": {
+    "title": "Benachrichtigungseinstellungen",
+    "daily_reminders": "📱 Tägliche Erinnerungen",
+    "daily_subtitle": "Ich würde gerne regelmäßig mit dir chatten! Wann soll ich dir Nachrichten senden?",
+    "morning": "Morgenbegrüßung",
+    "morning_subtitle": "Jeden Morgen um 09:00 Uhr ☀️",
+    "lunch": "Mittagspause",
+    "lunch_subtitle": "Jeden Tag um 13:00 Uhr 🍽️",
+    "evening": "Abend-Check-in",
+    "evening_subtitle": "Jeden Abend um 20:00 Uhr 🌙",
+    "appearance": "🎨 Darstellungseinstellungen",
+    "appearance_subtitle": "Passe das Erscheinungsbild der App an",
+    "dark_mode": "Dunkler Modus",
+    "dark_mode_active": "Dunkles Design ist derzeit aktiv 🌙",
+    "light_mode_active": "Helles Design ist derzeit aktiv ☀️",
+    "test_notification": "Testbenachrichtigung Senden",
+    "permission_required": "Benachrichtigungsberechtigung erforderlich!",
+    "test_title": "Testbenachrichtigung 🔔",
+    "test_body": "Benachrichtigungen funktionieren! Ich kann dir jetzt Nachrichten senden 💜",
+    "info": "Benachrichtigungen kommen jeden Tag zur gleichen Zeit. Du kannst sie jederzeit ausschalten!"
+  },
+"profile": {
+  "title": "Profil",
+  "membership": "Mitgliedschaft: {date}",
+  "my_interests": "Meine Interessen",
+  "statistics": "Statistiken",
+  "total_messages": "Gesamte Nachrichten",
+  "active_days": "Aktive Tage",
+  "days_count": "{count} Tage",
+  "settings": "Einstellungen",
+  "edit_profile": "Profil Bearbeiten",
+  "edit_profile_subtitle": "Ihren Namen und Ihre Interessen aktualisieren",
+  "notifications": "Benachrichtigungen",
+  "notifications_subtitle": "Benachrichtigungseinstellungen verwalten",
+  "reset_profile": "Profil Zurücksetzen",
+  "reset_profile_subtitle": "Alle Ihre Daten löschen und neu beginnen",
+  "reset_confirm_title": "Profil Zurücksetzen",
+  "reset_confirm_message": "Ihre Profilinformationen werden gelöscht und der Startbildschirm wird erneut angezeigt. Sind Sie sicher?",
+  "coming_soon": "Demnächst verfügbar!",
+  "no_profile": "Keine Profilinformationen gefunden"
+  },
+  "achievements": {
+  "title": "Erfolge",
+  "title_emoji": "Erfolge 🏆",
+  "unlocked": "✅ Freigeschaltet",
+  "locked": "🔒 Gesperrt",
+  "progress": "Gesamtfortschritt",
+  "completed": "{percent}% Abgeschlossen",
+  "count": "{unlocked} / {total}",
+  
+  "msg_10": {
+    "title": "Erster Schritt",
+    "description": "Sende 10 Nachrichten"
+  },
+  "msg_50": {
+    "title": "Chat-Liebhaber",
+    "description": "Sende 50 Nachrichten"
+  },
+  "msg_100": {
+    "title": "Gesprächig",
+    "description": "Sende 100 Nachrichten"
+  },
+  "msg_500": {
+    "title": "Chat-Meister",
+    "description": "Sende 500 Nachrichten"
+  },
+  "streak_3": {
+    "title": "3 Hintereinander",
+    "description": "Nutze 3 Tage hintereinander"
+  },
+  "streak_7": {
+    "title": "Wochen-Krieger",
+    "description": "Nutze 7 Tage hintereinander"
+  },
+  "streak_14": {
+    "title": "Zwei Wochen",
+    "description": "Nutze 14 Tage hintereinander"
+  },
+  "streak_30": {
+    "title": "Monats-Held",
+    "description": "Nutze 30 Tage hintereinander"
+  },
+  "fav_1": {
+    "title": "Erster Favorit",
+    "description": "Markiere deine erste Nachricht als Favorit"
+  },
+  "fav_10": {
+    "title": "Sammlung",
+    "description": "Markiere 10 Nachrichten als Favorit"
+  },
+  "voice_first": {
+    "title": "Sprach-Versuch",
+    "description": "Nutze Spracheingabe zum ersten Mal"
+  },
+  "search_first": {
+    "title": "Sucher",
+    "description": "Suche zum ersten Mal"
+  }
+}
+}

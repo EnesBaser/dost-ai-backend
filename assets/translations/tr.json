@@ -1,0 +1,222 @@
+{
+  "app": {
+    "name": "Dost AI",
+    "subtitle": "Senin yapay zeka arkadaşın",
+    "loading": "Yükleniyor..."
+  },
+  "common": {
+    "continue": "Devam",
+    "back": "Geri",
+    "start": "Başla",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "save": "Kaydet",
+    "edit": "Düzenle",
+    "close": "Kapat",
+    "yes": "Evet",
+    "no": "Hayır",
+    "ok": "Tamam",
+    "send": "Gönder",
+    "search": "Ara",
+    "today": "Bugün",
+    "this_week": "Bu Hafta",
+    "total": "Toplam"
+  },
+  "onboarding": {
+    "welcome_emoji": "👋",
+    "welcome_title": "Merhaba!",
+    "welcome_message": "Ben DostAI, senin yapay zeka arkadaşın.\n\nSeninle tanışmak ve seni daha iyi tanımak için birkaç soru sormak istiyorum.",
+    "name_question": "Adın ne?",
+    "name_hint": "Adını yaz...",
+    "nickname_greeting": "Merhaba {name}! 👋",
+    "nickname_question": "Sana nasıl hitap edeyim?",
+    "nickname_hint": "Örn: Dostum, Kardeşim, {name} Bey",
+    "nickname_skip": "Boş bırakırsan sadece \"{name}\" diye hitap ederim",
+    "interests_question": "İlgi alanların neler?",
+    "interests_subtitle": "Seni daha iyi tanımak için",
+    "interests_skip": "İstersen atla, sonra profil ayarlarından ekleyebilirsin",
+    "ready_title": "Her şey hazır!",
+    "ready_message": "Artık seninle konuşmaya hazırım {name}!\n\nHer zaman burada olacağım. 💜",
+    "interests": {
+      "tech": "Teknoloji",
+      "sports": "Spor",
+      "music": "Müzik",
+      "movies": "Film/Dizi",
+      "books": "Kitap",
+      "travel": "Seyahat",
+      "food": "Yemek",
+      "art": "Sanat",
+      "games": "Oyun",
+      "science": "Bilim"
+    }
+  },
+  "chat": {
+    "title": "Dost AI - {name}",
+    "empty_greeting": "Merhaba! Ben Dost AI.",
+    "input_hint": "Mesajını yaz...",
+    "listening": "Dinliyorum...",
+    "wake_word_active": "Wake Word Aktif",
+    "wake_word_inactive": "Wake Word Kapalı",
+    "tts_active": "Sesli Yanıt Aktif",
+    "tts_inactive": "Sesli Yanıt Kapalı"
+  },
+  "counter": {
+    "today": "Bugün",
+    "week": "Bu Hafta",
+    "total": "Toplam"
+  },
+  "notifications": {
+    "title": "Bildirim Ayarları",
+    "daily_reminders": "📱 Günlük Hatırlatmalar",
+    "daily_subtitle": "Seninle düzenli konuşmak istiyorum! Hangi saatlerde sana mesaj atayım?",
+    "morning": "Sabah Selaşması",
+    "morning_subtitle": "Her sabah 09:00'da ☀️",
+    "lunch": "Öğle Arası",
+    "lunch_subtitle": "Her gün 13:00'da 🍽️",
+    "evening": "Akşam Check-in",
+    "evening_subtitle": "Her akşam 20:00'da 🌙",
+    "appearance": "🎨 Görünüm Ayarları",
+    "appearance_subtitle": "Uygulamanın görünümünü özelleştir",
+    "dark_mode": "Karanlık Mod",
+    "dark_mode_active": "Şu an karanlık tema aktif 🌙",
+    "light_mode_active": "Şu an açık tema aktif ☀️",
+    "test_notification": "Test Bildirimi Gönder",
+    "permission_required": "Bildirim izni gerekli!",
+    "test_title": "Test Bildirimi 🔔",
+    "test_body": "Bildirimler çalışıyor! Artık sana mesaj atabilirim 💜",
+    "info": "Bildirimler her gün aynı saatte gelecek. İstediğin zaman kapatabilirsin!"
+  },
+  "profile": {
+    "title": "Profil",
+    "membership": "Üyelik: {date}",
+    "my_interests": "İlgi Alanlarım",
+    "statistics": "İstatistikler",
+    "total_messages": "Toplam Mesaj",
+    "active_days": "Aktif Gün",
+    "days_count": "{count} gün",
+    "settings": "Ayarlar",
+    "edit_profile": "Profili Düzenle",
+    "edit_profile_subtitle": "Adını ve ilgi alanlarını güncelle",
+    "notifications": "Bildirimler",
+    "notifications_subtitle": "Bildirim ayarlarını yönet",
+    "reset_profile": "Profili Sıfırla",
+    "reset_profile_subtitle": "Tüm verilerini sil ve yeniden başla",
+    "reset_confirm_title": "Profili Sıfırla",
+    "reset_confirm_message": "Profil bilgileriniz silinecek ve yeniden başlangıç ekranı gösterilecek. Emin misiniz?",
+    "coming_soon": "Yakında eklenecek!",
+    "no_profile": "Profil bilgisi bulunamadı"
+  },
+  "achievements": {
+    "title": "Başarımlar",
+    "title_emoji": "Başarımlar 🏆",
+    "unlocked": "✅ Kazanılan",
+    "locked": "🔒 Bekleyenler",
+    "progress": "Toplam İlerleme",
+    "completed": "{percent}% Tamamlandı",
+    "count": "{unlocked} / {total}",
+    "msg_10": {
+      "title": "İlk Adım",
+      "description": "10 mesaj gönder"
+    },
+    "msg_50": {
+      "title": "Sohbet Sevdim",
+      "description": "50 mesaj gönder"
+    },
+    "msg_100": {
+      "title": "Konuşkan",
+      "description": "100 mesaj gönder"
+    },
+    "msg_500": {
+      "title": "Sohbet Ustası",
+      "description": "500 mesaj gönder"
+    },
+    "streak_3": {
+      "title": "Üst Üste 3",
+      "description": "3 gün ardışık kullan"
+    },
+    "streak_7": {
+      "title": "Hafta Savaşçısı",
+      "description": "7 gün ardışık kullan"
+    },
+    "streak_14": {
+      "title": "İki Hafta",
+      "description": "14 gün ardışık kullan"
+    },
+    "streak_30": {
+      "title": "Aylık Kahraman",
+      "description": "30 gün ardışık kullan"
+    },
+    "fav_1": {
+      "title": "İlk Favori",
+      "description": "İlk mesajı favorile"
+    },
+    "fav_10": {
+      "title": "Koleksiyon",
+      "description": "10 mesaj favorile"
+    },
+    "voice_first": {
+      "title": "Sesli Deneme",
+      "description": "İlk kez ses girişi yap"
+    },
+    "search_first": {
+      "title": "Arama Yapan",
+      "description": "İlk kez arama yap"
+    }
+  },
+  "mood": {
+    "title": "Ruh Hali Grafiği",
+    "title_emoji": "Ruh Hali 📊",
+    "positive": "Mutlu",
+    "neutral": "Nötr",
+    "negative": "Üzgün",
+    "analyzed": "Analiz Edildi",
+    "no_messages": "Henüz mesaj yok",
+    "last_7_days": "Son 7 Gün",
+    "last_30_days": "Son 30 Gün",
+    "this_week": "Bu Hafta",
+    "this_month": "Bu Ay",
+    "dominant_emotion": "Baskın Duygu",
+    "dominant_emotion_positive": "Mutlu",
+    "dominant_emotion_neutral": "Nötr",
+    "dominant_emotion_negative": "Üzgün",
+    "weekly_summary": "Haftalık Özet",
+    "summary_tough": "Zorlu bir hafta geçirdin",
+    "summary_stable": "Dengeli bir hafta",
+    "summary_great": "Harika bir hafta!",
+    "daily_detail": "Günlük Detay",
+    "months": {
+      "jan": "Ocak",
+      "feb": "Şubat",
+      "mar": "Mart",
+      "apr": "Nisan",
+      "may": "Mayıs",
+      "jun": "Haziran",
+      "jul": "Temmuz",
+      "aug": "Ağustos",
+      "sep": "Eylül",
+      "oct": "Ekim",
+      "nov": "Kasım",
+      "dec": "Aralık"
+    },
+    "days": {
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt",
+      "sun": "Paz"
+    }
+  },
+  "search": {
+    "title": "Arama",
+    "hint": "Mesajlarda ara...",
+    "statistics": "İstatistikler",
+    "stat_total": "Toplam",
+    "stat_user": "Senin",
+    "stat_ai": "AI",
+    "filter_today": "Bugün",
+    "filter_week": "Bu Hafta",
+    "empty_state": "Arama yapmak için yukarıdaki kutuya yazın veya hızlı filtrelerden birini seçin."
+  }
+}

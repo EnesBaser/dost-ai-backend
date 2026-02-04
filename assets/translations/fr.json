@@ -1,0 +1,169 @@
+{
+  "app": {
+    "name": "Dost AI",
+    "subtitle": "Votre compagnon IA",
+    "loading": "Chargement..."
+  },
+  "common": {
+    "continue": "Continuer",
+    "back": "Retour",
+    "start": "Commencer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "send": "Envoyer",
+    "search": "Rechercher",
+    "today": "Aujourd'hui",
+    "this_week": "Cette Semaine",
+    "total": "Total"
+  },
+  "onboarding": {
+    "welcome_emoji": "👋",
+    "welcome_title": "Bonjour!",
+    "welcome_message": "Je suis DostAI, votre compagnon IA.\n\nJ'aimerais vous poser quelques questions pour mieux vous connaître.",
+    "name_question": "Comment vous appelez-vous?",
+    "name_hint": "Tapez votre nom...",
+    "nickname_greeting": "Bonjour {name}! 👋",
+    "nickname_question": "Comment dois-je vous appeler?",
+    "nickname_hint": "Ex: Mon ami, {name}",
+    "nickname_skip": "Si vous le laissez vide, je vous appellerai simplement \"{name}\"",
+    "interests_question": "Quels sont vos centres d'intérêt?",
+    "interests_subtitle": "Pour mieux vous connaître",
+    "interests_skip": "Vous pouvez ignorer cela et les ajouter plus tard",
+    "ready_title": "Tout est prêt!",
+    "ready_message": "Je suis prêt à discuter avec vous {name}!\n\nJe serai toujours là. 💜",
+    "interests": {
+      "tech": "Technologie",
+      "sports": "Sports",
+      "music": "Musique",
+      "movies": "Films/Séries",
+      "books": "Livres",
+      "travel": "Voyages",
+      "food": "Nourriture",
+      "art": "Art",
+      "games": "Jeux",
+      "science": "Science"
+    }
+  },
+  "chat": {
+    "title": "Dost AI - {name}",
+    "empty_greeting": "Bonjour! Je suis Dost AI.",
+    "input_hint": "Tapez votre message...",
+    "listening": "J'écoute...",
+    "wake_word_active": "Mot d'Activation Actif",
+    "wake_word_inactive": "Mot d'Activation Désactivé",
+    "tts_active": "Réponse Vocale Active",
+    "tts_inactive": "Réponse Vocale Désactivée"
+  },
+  "counter": {
+    "today": "Aujourd'hui",
+    "week": "Cette Semaine",
+    "total": "Total"
+  },
+  "notifications": {
+    "title": "Paramètres de Notification",
+    "daily_reminders": "📱 Rappels Quotidiens",
+    "daily_subtitle": "J'aimerais discuter avec vous régulièrement! Quand dois-je vous envoyer des messages?",
+    "morning": "Salutation Matinale",
+    "morning_subtitle": "Chaque matin à 09h00 ☀️",
+    "lunch": "Pause Déjeuner",
+    "lunch_subtitle": "Chaque jour à 13h00 🍽️",
+    "evening": "Bilan du Soir",
+    "evening_subtitle": "Chaque soir à 20h00 🌙",
+    "appearance": "🎨 Paramètres d'Apparence",
+    "appearance_subtitle": "Personnaliser l'apparence de l'application",
+    "dark_mode": "Mode Sombre",
+    "dark_mode_active": "Le thème sombre est actuellement actif 🌙",
+    "light_mode_active": "Le thème clair est actuellement actif ☀️",
+    "test_notification": "Envoyer une Notification de Test",
+    "permission_required": "Autorisation de notification requise!",
+    "test_title": "Notification de Test 🔔",
+    "test_body": "Les notifications fonctionnent! Je peux maintenant vous envoyer des messages 💜",
+    "info": "Les notifications arriveront à la même heure chaque jour. Vous pouvez les désactiver à tout moment!"
+  },
+
+"profile": {
+  "title": "Profil",
+  "membership": "Adhésion : {date}",
+  "my_interests": "Mes centres d'intérêt",
+  "statistics": "Statistiques",
+  "total_messages": "Messages Totaux",
+  "active_days": "Jours Actifs",
+  "days_count": "{count} jours",
+  "settings": "Paramètres",
+  "edit_profile": "Modifier le Profil",
+  "edit_profile_subtitle": "Mettre à jour votre nom et vos centres d'intérêt",
+  "notifications": "Notifications",
+  "notifications_subtitle": "Gérer les paramètres de notification",
+  "reset_profile": "Réinitialiser le Profil",
+  "reset_profile_subtitle": "Supprimer toutes vos données et recommencer",
+  "reset_confirm_title": "Réinitialiser le Profil",
+  "reset_confirm_message": "Les informations de votre profil seront supprimées et l'écran de démarrage sera affiché à nouveau. Êtes-vous sûr ?",
+  "coming_soon": "Bientôt disponible !",
+  "no_profile": "Aucune information de profil trouvée"
+  },
+  "achievements": {
+  "title": "Succès",
+  "title_emoji": "Succès 🏆",
+  "unlocked": "✅ Débloqués",
+  "locked": "🔒 Verrouillés",
+  "progress": "Progression Globale",
+  "completed": "{percent}% Complété",
+  "count": "{unlocked} / {total}",
+  
+  "msg_10": {
+    "title": "Premier Pas",
+    "description": "Envoyer 10 messages"
+  },
+  "msg_50": {
+    "title": "Amateur de Chat",
+    "description": "Envoyer 50 messages"
+  },
+  "msg_100": {
+    "title": "Bavard",
+    "description": "Envoyer 100 messages"
+  },
+  "msg_500": {
+    "title": "Maître du Chat",
+    "description": "Envoyer 500 messages"
+  },
+  "streak_3": {
+    "title": "3 d'Affilée",
+    "description": "Utiliser 3 jours consécutifs"
+  },
+  "streak_7": {
+    "title": "Guerrier Hebdomadaire",
+    "description": "Utiliser 7 jours consécutifs"
+  },
+  "streak_14": {
+    "title": "Deux Semaines",
+    "description": "Utiliser 14 jours consécutifs"
+  },
+  "streak_30": {
+    "title": "Héros Mensuel",
+    "description": "Utiliser 30 jours consécutifs"
+  },
+  "fav_1": {
+    "title": "Premier Favori",
+    "description": "Marquer votre premier message favori"
+  },
+  "fav_10": {
+    "title": "Collection",
+    "description": "Marquer 10 messages favoris"
+  },
+  "voice_first": {
+    "title": "Essai Vocal",
+    "description": "Utiliser l'entrée vocale pour la première fois"
+  },
+  "search_first": {
+    "title": "Chercheur",
+    "description": "Rechercher pour la première fois"
+  }
+}
+}
+
