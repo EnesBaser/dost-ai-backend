@@ -354,14 +354,10 @@ def chat_web():
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok'})
-
 if __name__ == '__main__':
     init_db()
     print("✅ Veritabanı hazır!")
-    print("🚀 Backend başlatılıyor...")
-    print("📱 Mobil: /chat")
-    print("🌐 Web: /api/chat")
-    print("💚 Health: /health")
     
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)    
+    port = int(os.environ.get('PORT', 8080))  # Railway PORT
+    print(f"🚀 Starting on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
