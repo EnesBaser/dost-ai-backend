@@ -3,13 +3,13 @@ import 'dart:convert';
 
 class ApiService {
   // Geliştirme/Üretim modu
-  static const bool isDevelopment = true;
+  static const bool isDevelopment = false;  // Railway kullanıyoruz
   
-  // Development: Localhost
+  // Development: Emulator için localhost
   static const String devUrl = 'http://10.0.2.2:5001';
   
-  // Production: Gerçek sunucu (daha sonra eklenecek)
-  static const String prodUrl = 'https://your-production-url.com';
+  // Production: Railway
+  static const String prodUrl = 'https://dost-ai-backend-production.up.railway.app';
   
   // Aktif URL
   static String get baseUrl => isDevelopment ? devUrl : prodUrl;
