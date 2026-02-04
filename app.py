@@ -364,6 +364,5 @@ if __name__ == '__main__':
     print("🌐 Web: /api/chat")
     print("💚 Health: /health")
     
+    port = int(os.environ.get('PORT', 5001))  # Railway PORT'unu kullan
     
-    app.run(host="0.0.0.0", port=5001, debug=False, use_reloader=False)
-
