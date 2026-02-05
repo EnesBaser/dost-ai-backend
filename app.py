@@ -1,157 +1,149 @@
+import os
+import sqlite3
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 from openai import OpenAI
-from dotenv import load_dotenv
-import os
-import sqlite3
-from datetime import datetime
-import pytz
 
-load_dotenv()
+# --------------------
+# Flask App
+# --------------------
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # 🔴 MOBİL İÇİN KRİTİK
 
-# Türkiye timezone'u tanımla
-TURKEY_TZ = pytz.timezone('Europe/Istanbul')
-
-# --------------------------------------------------
-# OPENAI CLIENT (TEK, DOKUNULMADI)
-# --------------------------------------------------
+# --------------------
+# OpenAI Client
+# --------------------
 try:
-    api_key = os.getenv('OPENAI_API_KEY')
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY bulunamadı!")
+        raise ValueError("OPENAI_API_KEY bulunamadı")
     client = OpenAI(api_key=api_key)
-    print("✅ OpenAI client başarıyla oluşturuldu!")
+    print("✅ OpenAI client hazır")
 except Exception as e:
-    print(f"❌ OpenAI client oluşturulamadı: {e}")
+    print(f"❌ OpenAI client hatası: {e}")
     client = None
 
-# --------------------------------------------------
-# DATABASE
-# --------------------------------------------------
-def get_db():
-    conn = sqlite3.connect('memory.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def get_turkey_time():
-    """Türkiye saatini döndür"""
-    return datetime.now(TURKEY_TZ)
+# --------------------
+# Database
+# --------------------
+DB_PATH = "chat.db"
 
 def init_db():
-    """Veritabanını başlat"""
-    conn = get_db()
-    conn.execute('''
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            role TEXT NOT NULL,
-            content TEXT NOT NULL,
-            timestamp TEXT NOT NULL
+            role TEXT,
+            content TEXT
         )
-    ''')
+    """)
     conn.commit()
     conn.close()
 
-def save_message(role, content):
-    """Mesajı Türkiye saati ile kaydet"""
-    conn = get_db()
-    turkey_time = get_turkey_time().isoformat()
-    conn.execute(
-        'INSERT INTO messages (role, content, timestamp) VALUES (?, ?, ?)',
-        (role, content, turkey_time)
-    )
-    conn.commit()
-    conn.close()
+init_db()
+print("✅ Veritabanı hazır")
 
-def get_conversation_history(limit=10):
-    conn = get_db()
-    messages = conn.execute(
-        'SELECT role, content FROM messages ORDER BY id DESC LIMIT ?',
-        (limit,)
-    ).fetchall()
-    conn.close()
-    return [{"role": msg['role'], "content": msg['content']} for msg in reversed(messages)]
-
-# --------------------------------------------------
-# WEB ARAYÜZÜ (AYNEN KORUNDU)
-# --------------------------------------------------
-@app.route('/')
+# --------------------
+# Web UI
+# --------------------
+@app.route("/")
 def home():
-    return render_template_string('''
+    return render_template_string("""
 <!DOCTYPE html>
-<!-- (BURADA SENİN GÖNDERDİĞİN HTML / CSS / JS
-     HİÇBİR SATIRI DEĞİŞTİRİLMEDİ) -->
-''' + """
-""" + '''
-''')
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dost AI</title>
+<style>
+body { font-family: Arial; background:#f0f0f0; display:flex; justify-content:center; }
+#box { width:100%; max-width:500px; background:white; margin-top:40px; padding:20px; border-radius:10px; }
+#messages { height:300px; overflow:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px; }
+input { width:80%; padding:8px; }
+button { padding:8px; }
+</style>
+</head>
+<body>
+<div id="box">
+<h2>🤖 Dost AI</h2>
+<div id="messages"></div>
+<input id="msg" placeholder="Mesaj yaz">
+<button onclick="send()">Gönder</button>
+</div>
 
-# --------------------------------------------------
-# MOBİL + WEB CHAT ENDPOINT
-# --------------------------------------------------
-@app.route('/chat', methods=['POST'])
-def chat_mobile():
-    data = request.json or {}
-    user_message = data.get('message', '')
-    user_name = data.get('userName', data.get('user_name', 'Arkadaşım'))
-    conversation_history = data.get('conversation_history', [])
-    interests = data.get('interests', [])
-    emotion = data.get('emotion', 'neutral')
+<script>
+async function send() {
+    const input = document.getElementById("msg");
+    const text = input.value.trim();
+    if(!text) return;
+    input.value = "";
 
+    document.getElementById("messages").innerHTML += "<div><b>Sen:</b> "+text+"</div>";
+
+    const res = await fetch("/chat", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ message:text })
+    });
+
+    const data = await res.json();
+    document.getElementById("messages").innerHTML += "<div><b>Dost:</b> "+data.response+"</div>";
+}
+</script>
+</body>
+</html>
+""")
+
+# --------------------
+# Chat API
+# --------------------
+@app.route("/chat", methods=["POST"])
+def chat():
     if not client:
-        return jsonify({'response': 'OpenAI bağlantısı kurulamadı'})
+        return jsonify({"response": "AI hazır değil"}), 500
 
-    save_message('user', user_message)
+    data = request.get_json()
+    user_message = data.get("message", "")
 
-    interests_text = ', '.join(interests) if interests else 'çeşitli konular'
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT INTO messages (role, content) VALUES (?,?)", ("user", user_message))
+    conn.commit()
 
-    emotional_context = ""
-    if emotion == 'sad':
-        emotional_context = f"{user_name} üzgün görünüyor. Destekleyici ol."
-    elif emotion == 'happy':
-        emotional_context = f"{user_name} mutlu görünüyor. Pozitif ol."
-    elif emotion == 'confused':
-        emotional_context = f"{user_name} kafası karışık. Net ol."
-    elif emotion == 'angry':
-        emotional_context = f"{user_name} sinirli. Sakin ol."
+    c.execute("SELECT role, content FROM messages ORDER BY id DESC LIMIT 10")
+    rows = c.fetchall()
+    conn.close()
 
-    system_prompt = f"""Sen Dost adında, {user_name}'ın en iyi arkadaşısın.
-Samimi, destekleyici ve eğlenceli konuşursun.
-{user_name}'ın ilgi alanları: {interests_text}.
-Geçmiş konuşmaları hatırla ve kullan.
-{emotional_context}
-Kısa ve samimi yanıtlar ver."""
+    messages = [{"role": r, "content": c} for r,c in reversed(rows)]
 
-    messages = [{"role": "system", "content": system_prompt}]
+    try:
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages
+        )
+        reply = completion.choices[0].message.content
+    except Exception as e:
+        return jsonify({"response": str(e)}), 500
 
-    if conversation_history:
-        messages.extend(conversation_history[-10:])
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT INTO messages (role, content) VALUES (?,?)", ("assistant", reply))
+    conn.commit()
+    conn.close()
 
-    messages.append({"role": "user", "content": user_message})
+    return jsonify({"response": reply})
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-        max_tokens=150,
-        temperature=0.8
-    )
-
-    ai_response = response.choices[0].message.content
-    save_message('assistant', ai_response)
-
-    return jsonify({'response': ai_response})
-
-@app.route('/api/chat', methods=['POST'])
-def chat_web():
-    return chat_mobile()
-
-@app.route('/health')
+# --------------------
+# Health
+# --------------------
+@app.route("/health")
 def health():
-    return jsonify({'status': 'ok'})
+    return jsonify({"status": "ok"})
 
-if __name__ == '__main__':
-    init_db()
-    print("✅ Veritabanı hazır!")
-    port = int(os.environ.get('PORT', 8080))
-    print(f"🚀 Starting on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+# --------------------
+# Run
+# --------------------
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
