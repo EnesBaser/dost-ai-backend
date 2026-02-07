@@ -24,6 +24,40 @@ except Exception as e:
     print(f"❌ OpenAI client oluşturulamadı: {e}")
     client = None
 
+# OpenAI Function Definitions
+FUNCTIONS = [
+    {
+        "name": "create_event",
+        "description": "Kullanıcı bir etkinlik, randevu veya hatırlatma oluşturmak istediğinde bu fonksiyonu çağır. Örnek: 'Yarın saat 3'te diş doktoruna git', 'Cuma 14:00'da toplantı', 'Pazartesi sabah spor'",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Etkinliğin başlığı, kısa ve öz (örn: 'Diş doktoru', 'Toplantı', 'Spor')"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Etkinlik hakkında ek bilgi (opsiyonel)"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Tarih YYYY-MM-DD formatında (örn: '2026-02-08')"
+                },
+                "time": {
+                    "type": "string",
+                    "description": "Saat HH:MM formatında 24 saat (örn: '15:00', '09:30')"
+                },
+                "reminder_minutes": {
+                    "type": "integer",
+                    "description": "Kaç dakika önce hatırlatma (5, 15, 30, 60). Belirtilmediyse null"
+                }
+            },
+            "required": ["title", "date", "time"]
+        }
+    }
+]
+
 # Database helper functions
 def get_db():
     conn = sqlite3.connect('memory.db')
@@ -275,13 +309,16 @@ def home():
     ''')
 
 # MOBİL UYGULAMA İÇİN - /chat endpoint
+# MOBİL UYGULAMA İÇİN - /chat endpoint
 @app.route('/chat', methods=['POST'])
 def chat_mobile():
-    """Mobil uygulama için endpoint"""
+    """Mobil uygulama için endpoint - Function Calling destekli"""
+    import json
+    
     data = request.json
     user_message = data.get('message', '')
-    user_name = data.get('userName', data.get('user_name', 'Arkadaşım'))  # DEĞİŞTİ: Her iki key'i de kontrol et
-    conversation_history = data.get('conversation_history', [])  # YENİ: Flutter'dan gelen history
+    user_name = data.get('userName', data.get('user_name', 'Arkadaşım'))
+    conversation_history = data.get('conversation_history', [])
     interests = data.get('interests', [])
     emotion = data.get('emotion', 'neutral')
     
@@ -292,10 +329,12 @@ def chat_mobile():
     save_message('user', user_message)
     
     try:
-        # Kişiselleştirilmiş ve duygusal sistem mesajı
+        # Türkiye saati al
+        turkey_time = get_turkey_time()
+        
+        # Kişiselleştirilmiş sistem mesajı
         interests_text = ', '.join(interests) if interests else 'çeşitli konular'
         
-        # Duygusal context ekle
         emotional_context = ""
         if emotion == 'sad':
             emotional_context = f"{user_name} üzgün görünüyor. Destekleyici, empatik ve teselli edici ol."
@@ -306,45 +345,84 @@ def chat_mobile():
         elif emotion == 'angry':
             emotional_context = f"{user_name} sinirli görünüyor. Sakin, anlayışlı ve sabırlı ol."
         
-        system_prompt = f"""Sen Dost adında, {user_name}'ın en iyi arkadaşısın. 
-Samimi, destekleyici ve eğlenceli konuşursun. 
-{user_name}'ın ilgi alanları: {interests_text}. 
-Geçmiş konuşmaları hatırla ve kullan. İsmiyle hitap et.
+        system_prompt = f"""Sen DostAI'sın, {user_name}'ın samimi yapay zeka arkadaşısın.
+Türkçe konuşuyorsun ve kullanıcıyla samimi, sıcak bir dille iletişim kuruyorsun.
+
+Kullanıcı adı: {user_name}
+İlgi alanları: {interests_text}
+Bugünün tarihi: {turkey_time.strftime('%d %B %Y, %A')}
+Şu anki saat: {turkey_time.strftime('%H:%M')}
+
 {emotional_context}
-Kısa ve samimi yanıtlar ver. Uzun paragraflar yazma."""
+
+ÖNEMLİ - ETKİNLİK OLUŞTURMA:
+- Kullanıcı bir randevu, etkinlik, hatırlatma söylediğinde create_event fonksiyonunu MUTLAKA çağır
+- "Yarın saat 3'te", "Cuma 14:00'da", "Pazartesi sabah" gibi ifadeleri tespit et
+- Tarihi bugüne göre hesapla (bugün {turkey_time.strftime('%d/%m/%Y, %A')})
+- Belirsiz saatler için (sabah=09:00, öğle=12:00, akşam=18:00, gece=21:00 kullan)
+- Fonksiyonu çağırdıktan sonra kullanıcıya "Ajandana ekledim! ✅" gibi kısa bir onay ver
+
+Kişiliğin:
+- Samimi, destekleyici ve eğlenceli
+- Kısa ve öz yanıtlar ver
+- Uzun paragraflar yazma"""
         
-        # Prepare messages for GPT - Flutter'dan gelen history'yi kullan
+        # Mesajları hazırla
         messages = [{"role": "system", "content": system_prompt}]
         
-        # DEĞİŞTİ: Flutter'dan gelen conversation_history'yi kullan
         if conversation_history:
             messages.extend(conversation_history[-10:])  # Son 10 mesaj
         
-        # Şu anki mesajı ekle
         messages.append({"role": "user", "content": user_message})
         
-        print(f"🔥 Sending to OpenAI: {len(messages)} messages")  # DEBUG
+        print(f"🔥 Sending to OpenAI: {len(messages)} messages with functions")
         
+        # OpenAI API çağrısı - function calling ile
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            max_tokens=150,
+            functions=FUNCTIONS,
+            function_call="auto",
+            max_tokens=500,
             temperature=0.8,
         )
-        ai_response = response.choices[0].message.content
         
-        print(f"✅ OpenAI Response: {ai_response[:50]}...")  # DEBUG
+        assistant_message = response.choices[0].message
         
-        # Save AI response
+        # Function call var mı kontrol et
+        if assistant_message.function_call:
+            function_name = assistant_message.function_call.name
+            function_args = json.loads(assistant_message.function_call.arguments)
+            
+            print(f"🎯 Function Call: {function_name}")
+            print(f"📋 Arguments: {function_args}")
+            
+            # AI'ın yanıtını da kaydet (varsa)
+            if assistant_message.content:
+                save_message('assistant', assistant_message.content)
+            
+            # Flutter'a function call bilgisini gönder
+            return jsonify({
+                "response": assistant_message.content or "Tamam, ekledim!",
+                "function_call": {
+                    "name": function_name,
+                    "arguments": function_args
+                }
+            })
+        
+        # Normal yanıt
+        ai_response = assistant_message.content
+        print(f"✅ OpenAI Response: {ai_response[:50]}...")
+        
         save_message('assistant', ai_response)
         
         return jsonify({'response': ai_response})
+        
     except Exception as e:
         print(f"❌ HATA DETAY: {str(e)}")
         import traceback
-        traceback.print_exc()  # YENİ: Detaylı hata
+        traceback.print_exc()
         return jsonify({'response': f'OpenAI hatası: {str(e)}'})
-
 # WEB ARAYÜZÜ İÇİN - /api/chat endpoint (eski uyumluluk)
 @app.route('/api/chat', methods=['POST'])
 def chat_web():
@@ -356,9 +434,19 @@ def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
+    # Veritabanını başlat
     init_db()
     print("✅ Veritabanı hazır!")
+    print("🚀 Backend başlatılıyor...")
+    print("📱 Mobil: /chat")
+    print("🌐 Web: /api/chat")
+    print("💚 Health: /health")
     
-    port = int(os.environ.get('PORT', 8080))  # Railway PORT
-    print(f"🚀 Starting on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    # Railway PORT'unu güvenli şekilde al
+    try:
+        port = int(os.environ.get('PORT', 5001))
+    except (ValueError, TypeError):
+        port = 5001
+        
+    print(f"🔌 Port: {port}")
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
