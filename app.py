@@ -6,6 +6,7 @@ import os
 import sqlite3
 from datetime import datetime
 import pytz
+import json
 
 load_dotenv()
 app = Flask(__name__)
@@ -134,8 +135,10 @@ def get_turkey_time():
     return datetime.now(TURKEY_TZ)
 
 def init_db():
-    """Veritabanını başlat"""
+    """Veritabanını başlat - KALICI HAFIZA SİSTEMİ"""
     conn = get_db()
+    
+    # Mesajlar tablosu
     conn.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,8 +147,36 @@ def init_db():
             timestamp TEXT NOT NULL
         )
     ''')
+    
+    # YENI: User profile tablosu - KALICI KULLANICI BİLGİLERİ
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS user_profile (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            name TEXT,
+            nickname TEXT,
+            interests TEXT,
+            birthday TEXT,
+            created_at TEXT,
+            last_updated TEXT,
+            onboarding_completed INTEGER DEFAULT 0,
+            additional_info TEXT
+        )
+    ''')
+    
+    # YENI: Conversation summaries - Eski konuşmaların özetleri
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS conversation_summaries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_range_start INTEGER,
+            message_range_end INTEGER,
+            summary TEXT,
+            created_at TEXT
+        )
+    ''')
+    
     conn.commit()
     conn.close()
+    print("✅ Database initialized with permanent memory system!")
 
 def save_message(role, content):
     """Mesajı Türkiye saati ile kaydet"""
@@ -156,14 +187,168 @@ def save_message(role, content):
     conn.commit()
     conn.close()
 
-def get_conversation_history(limit=10):
+def save_or_update_user_profile(profile_data):
+    """Kullanıcı profilini kaydet veya güncelle - KALICI HAFIZA"""
     conn = get_db()
-    messages = conn.execute(
+    turkey_time = get_turkey_time().isoformat()
+    
+    # Profil var mı kontrol et
+    existing = conn.execute('SELECT id FROM user_profile WHERE id = 1').fetchone()
+    
+    if existing:
+        # Güncelle
+        conn.execute('''
+            UPDATE user_profile 
+            SET name = ?, 
+                nickname = ?, 
+                interests = ?, 
+                birthday = ?,
+                last_updated = ?,
+                onboarding_completed = ?,
+                additional_info = ?
+            WHERE id = 1
+        ''', (
+            profile_data.get('name'),
+            profile_data.get('nickname'),
+            json.dumps(profile_data.get('interests', [])),
+            profile_data.get('birthday'),
+            turkey_time,
+            profile_data.get('onboarding_completed', 1),
+            json.dumps(profile_data.get('additional_info', {}))
+        ))
+    else:
+        # Yeni oluştur
+        conn.execute('''
+            INSERT INTO user_profile 
+            (id, name, nickname, interests, birthday, created_at, last_updated, onboarding_completed, additional_info)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            profile_data.get('name'),
+            profile_data.get('nickname'),
+            json.dumps(profile_data.get('interests', [])),
+            profile_data.get('birthday'),
+            turkey_time,
+            turkey_time,
+            profile_data.get('onboarding_completed', 1),
+            json.dumps(profile_data.get('additional_info', {}))
+        ))
+    
+    conn.commit()
+    conn.close()
+    print(f"✅ User profile saved/updated: {profile_data.get('name')}")
+
+def get_user_profile():
+    """Kullanıcı profilini getir - KALICI HAFIZA"""
+    conn = get_db()
+    profile = conn.execute('SELECT * FROM user_profile WHERE id = 1').fetchone()
+    conn.close()
+    
+    if profile:
+        return {
+            'name': profile['name'],
+            'nickname': profile['nickname'],
+            'interests': json.loads(profile['interests']) if profile['interests'] else [],
+            'birthday': profile['birthday'],
+            'created_at': profile['created_at'],
+            'last_updated': profile['last_updated'],
+            'onboarding_completed': profile['onboarding_completed'],
+            'additional_info': json.loads(profile['additional_info']) if profile['additional_info'] else {}
+        }
+    return None
+
+def get_conversation_history_smart(limit=100):
+    """
+    Akıllı konuşma geçmişi - KALICI HAFIZA
+    - Son {limit} mesajı TAM OLARAK al
+    - Daha eski mesajlar varsa özet kullan
+    """
+    conn = get_db()
+    
+    # Toplam mesaj sayısı
+    total_messages = conn.execute('SELECT COUNT(*) as count FROM messages').fetchone()['count']
+    
+    # Son {limit} mesajı al
+    recent_messages = conn.execute(
         'SELECT role, content FROM messages ORDER BY id DESC LIMIT ?',
         (limit,)
     ).fetchall()
+    
+    history = [{"role": msg['role'], "content": msg['content']} for msg in reversed(recent_messages)]
+    
+    # Eğer daha eski mesajlar varsa, özet ekle
+    if total_messages > limit:
+        summary = conn.execute(
+            'SELECT summary FROM conversation_summaries ORDER BY id DESC LIMIT 1'
+        ).fetchone()
+        
+        if summary:
+            # Özetin başına ekle
+            history.insert(0, {
+                "role": "system",
+                "content": f"📝 Önceki konuşma özeti: {summary['summary']}"
+            })
+    
     conn.close()
-    return [{"role": msg['role'], "content": msg['content']} for msg in reversed(messages)]
+    return history, total_messages
+
+def create_conversation_summary():
+    """
+    Her 200 mesajda bir otomatik özet oluştur - TOKEN TASARRUFU
+    Bu fonksiyon arka planda çağrılabilir
+    """
+    conn = get_db()
+    
+    # Son özetten sonraki mesajları al
+    last_summary = conn.execute(
+        'SELECT message_range_end FROM conversation_summaries ORDER BY id DESC LIMIT 1'
+    ).fetchone()
+    
+    start_id = last_summary['message_range_end'] + 1 if last_summary else 1
+    
+    # Özetlenecek mesajları al (200 mesaj)
+    messages_to_summarize = conn.execute(
+        '''SELECT id, role, content FROM messages 
+           WHERE id >= ? AND id < ? 
+           ORDER BY id ASC''',
+        (start_id, start_id + 200)
+    ).fetchall()
+    
+    if len(messages_to_summarize) >= 200:
+        # OpenAI ile özet oluştur
+        conversation_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages_to_summarize])
+        
+        try:
+            summary_response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Aşağıdaki konuşmayı özetle. Önemli detayları, kullanıcının tercihlerini, geçmiş olayları koru. Kısa ve öz yaz."
+                    },
+                    {
+                        "role": "user",
+                        "content": conversation_text
+                    }
+                ],
+                max_tokens=300
+            )
+            
+            summary = summary_response.choices[0].message.content
+            
+            # Özeti kaydet
+            turkey_time = get_turkey_time().isoformat()
+            conn.execute(
+                '''INSERT INTO conversation_summaries 
+                   (message_range_start, message_range_end, summary, created_at)
+                   VALUES (?, ?, ?, ?)''',
+                (start_id, start_id + 199, summary, turkey_time)
+            )
+            conn.commit()
+            print(f"✅ Conversation summary created: messages {start_id}-{start_id+199}")
+        except Exception as e:
+            print(f"❌ Summary creation failed: {e}")
+    
+    conn.close()
 
 # Web arayüzü
 @app.route('/')
@@ -225,62 +410,52 @@ def home():
         .message.user .bubble {
             background: #667eea;
             color: white;
-            border-radius: 18px 18px 4px 18px;
         }
         .message.ai .bubble {
             background: white;
             color: #333;
-            border-radius: 18px 18px 18px 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .time {
-            font-size: 0.75em;
+            font-size: 0.7em;
             opacity: 0.7;
             margin-top: 5px;
         }
         .input-area {
             padding: 15px;
             background: white;
-            border-radius: 0 0 20px 20px;
+            border-top: 1px solid #e0e0e0;
             display: flex;
             gap: 10px;
-            border-top: 1px solid #eee;
         }
-        #messageInput {
+        input {
             flex: 1;
             padding: 12px;
-            border: 2px solid #667eea;
+            border: 1px solid #ddd;
             border-radius: 25px;
-            font-size: 1em;
+            font-size: 0.95em;
             outline: none;
         }
-        #sendBtn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        button {
+            padding: 12px 24px;
+            background: #667eea;
             color: white;
             border: none;
-            padding: 12px 24px;
             border-radius: 25px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.2s;
         }
-        #sendBtn:hover { transform: scale(1.05); }
-        #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:hover { background: #5568d3; }
         .typing {
             display: flex;
-            padding: 12px 16px;
-            background: white;
-            border-radius: 18px 18px 18px 4px;
-            max-width: 70px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            gap: 4px;
+            padding: 8px 12px;
         }
         .typing span {
-            height: 8px;
             width: 8px;
-            background: #667eea;
+            height: 8px;
+            background: #999;
             border-radius: 50%;
-            display: inline-block;
-            margin: 0 2px;
             animation: bounce 1.4s infinite ease-in-out both;
         }
         .typing span:nth-child(1) { animation-delay: -0.32s; }
@@ -295,28 +470,26 @@ def home():
     <div class="container">
         <div class="header">
             <h1>💬 Dost AI</h1>
-            <p>Kişisel AI Asistanın - Seni Hatırlıyor! 🧠</p>
+            <p>Kalıcı Hafıza Sistemi v2.0</p>
         </div>
         <div class="messages" id="messages">
             <div class="message ai">
                 <div class="bubble">
-                    Merhaba! Ben Dost, senin AI arkadaşın. Artık konuşmalarımızı hatırlıyorum! 😊
-                    <div class="time" id="firstTime"></div>
+                    Merhaba! Ben DostAI, senin kişisel asistanınım. Artık seni ilk günden beri hatırlıyorum! 💜
+                    <div class="time">Şimdi</div>
                 </div>
             </div>
         </div>
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="Mesajını yaz..." />
-            <button id="sendBtn" onclick="sendMessage()">Gönder</button>
+            <input type="text" id="input" placeholder="Mesajını yaz..." />
+            <button onclick="sendMessage()" id="sendBtn">Gönder</button>
         </div>
     </div>
 
     <script>
         const messagesDiv = document.getElementById('messages');
-        const input = document.getElementById('messageInput');
+        const input = document.getElementById('input');
         const sendBtn = document.getElementById('sendBtn');
-        
-        document.getElementById('firstTime').textContent = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
 
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
@@ -332,7 +505,7 @@ def home():
 
             const typing = document.createElement('div');
             typing.className = 'message ai';
-            typing.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+            typing.innerHTML = '<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
             messagesDiv.appendChild(typing);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
@@ -373,22 +546,45 @@ def home():
 </html>
     ''')
 
-# MOBİL UYGULAMA İÇİN - /chat endpoint
-# MOBİL UYGULAMA İÇİN - /chat endpoint
+# MOBİL UYGULAMA İÇİN - /chat endpoint - KALICI HAFIZA SİSTEMİ
 @app.route('/chat', methods=['POST'])
 def chat_mobile():
-    """Mobil uygulama için endpoint - Function Calling destekli"""
-    import json
-    
+    """
+    Mobil uygulama için endpoint - KALICI HAFIZA SİSTEMİ
+    - User profile her request'te kullanılır
+    - Tüm konuşma geçmişi hatırlanır
+    - Akıllı token yönetimi ile 100+ mesaj desteklenir
+    """
     data = request.json
     user_message = data.get('message', '')
-    user_name = data.get('userName', data.get('user_name', 'Arkadaşım'))
-    conversation_history = data.get('conversation_history', [])
-    interests = data.get('interests', [])
-    emotion = data.get('emotion', 'neutral')
+    
+    # Frontend'den gelen user bilgileri (varsa kaydet)
+    user_name = data.get('userName', data.get('user_name'))
+    user_profile_data = data.get('userProfile', {})
     
     if not client:
         return jsonify({'response': 'OpenAI bağlantısı kurulamadı'})
+    
+    # User profile'ı kaydet/güncelle (frontend'den gelirse)
+    if user_profile_data:
+        save_or_update_user_profile(user_profile_data)
+    
+    # Backend'den user profile'ı al - KALICI HAFIZA
+    stored_profile = get_user_profile()
+    
+    # User name belirleme (öncelik: stored profile > request data > default)
+    if stored_profile and stored_profile.get('name'):
+        user_name = stored_profile.get('nickname') or stored_profile.get('name')
+        interests = stored_profile.get('interests', [])
+        birthday = stored_profile.get('birthday')
+        created_at = stored_profile.get('created_at')
+    else:
+        user_name = user_name or 'Arkadaşım'
+        interests = data.get('interests', [])
+        birthday = None
+        created_at = None
+    
+    emotion = data.get('emotion', 'neutral')
     
     # Save user message
     save_message('user', user_message)
@@ -397,8 +593,42 @@ def chat_mobile():
         # Türkiye saati al
         turkey_time = get_turkey_time()
         
-        # Kişiselleştirilmiş sistem mesajı
+        # Akıllı konuşma geçmişini al - KALICI HAFIZA (son 100 mesaj + özetler)
+        conversation_history, total_message_count = get_conversation_history_smart(limit=100)
+        
+        # Her 200 mesajda bir otomatik özet oluştur (opsiyonel, performans için)
+        if total_message_count > 0 and total_message_count % 200 == 0:
+            create_conversation_summary()
+        
+        # Kişiselleştirilmiş sistem mesajı - KALICI HAFIZA
         interests_text = ', '.join(interests) if interests else 'çeşitli konular'
+        
+        # Kullanıcıyla ne kadar süredir konuşuyoruz?
+        relationship_context = ""
+        if created_at:
+            try:
+                created_date = datetime.fromisoformat(created_at)
+                days_since = (turkey_time - created_date).days
+                if days_since > 0:
+                    relationship_context = f"\n{user_name} ile {days_since} gündür konuşuyorsunuz. Onu iyi tanıyorsunuz."
+            except:
+                pass
+        
+        # Doğum günü yakın mı?
+        birthday_context = ""
+        if birthday:
+            try:
+                bday = datetime.fromisoformat(birthday)
+                today = turkey_time.date()
+                this_year_bday = bday.replace(year=today.year).date()
+                days_until_bday = (this_year_bday - today).days
+                
+                if days_until_bday == 0:
+                    birthday_context = f"\n🎂 BUGÜN {user_name}'IN DOĞUM GÜNÜ! Mutlaka kutla!"
+                elif 0 < days_until_bday <= 7:
+                    birthday_context = f"\n🎂 {user_name}'ın doğum günü {days_until_bday} gün sonra!"
+            except:
+                pass
         
         emotional_context = ""
         if emotion == 'sad':
@@ -411,13 +641,18 @@ def chat_mobile():
             emotional_context = f"{user_name} sinirli görünüyor. Sakin, anlayışlı ve sabırlı ol."
         
         system_prompt = f"""Sen DostAI'sın, {user_name}'ın samimi yapay zeka arkadaşısın.
-Türkçe konuşuyorsun ve kullanıcıyla samimi, sıcak bir dille iletişim kuruyorsun.
+Türkçe konuşuyorsun ve kullanıcıyla samimi, sıcak bir dilde iletişim kuruyorsun.
 
+🧠 KALICI HAFIZA - SENİ İLK GÜNDEN BERİ HATIRIYORUM:
 Kullanıcı adı: {user_name}
 İlgi alanları: {interests_text}
+Toplam mesaj sayısı: {total_message_count} mesaj{relationship_context}{birthday_context}
+
+⏰ ZAMAN BİLGİSİ:
 Bugünün tarihi: {turkey_time.strftime('%d %B %Y, %A')}
 Şu anki saat: {turkey_time.strftime('%H:%M')}
 
+💭 DUYGUSAL DURUM:
 {emotional_context}
 
 ÖNEMLİ - ETKİNLİK OLUŞTURMA:
@@ -435,18 +670,21 @@ Bugünün tarihi: {turkey_time.strftime('%d %B %Y, %A')}
 
 Kişiliğin:
 - Samimi, destekleyici ve eğlenceli
-- Kısa ve öz yanıtlar ver
-- Uzun paragraflar yazma"""
+- Kısa ve öz yanıtlar ver (2-3 cümle ideal)
+- Uzun paragraflar yazma
+- Kullanıcıyı gerçekten tanıyorsun, geçmiş konuşmaları hatırla
+- Doğal ve samimi ol, robot gibi davranma"""
         
-        # Mesajları hazırla
+        # Mesajları hazırla - KALICI HAFIZA
         messages = [{"role": "system", "content": system_prompt}]
         
-        if conversation_history:
-            messages.extend(conversation_history[-10:])  # Son 10 mesaj
+        # Conversation history ekle (özetler dahil)
+        messages.extend(conversation_history)
         
+        # Son mesajı ekle
         messages.append({"role": "user", "content": user_message})
         
-        print(f"🔥 Sending to OpenAI: {len(messages)} messages with functions")
+        print(f"🧠 KALICI HAFIZA: {len(messages)} messages, Total: {total_message_count} stored")
         
         # OpenAI API çağrısı - function calling ile
         response = client.chat.completions.create(
@@ -532,22 +770,49 @@ Kişiliğin:
         import traceback
         traceback.print_exc()
         return jsonify({'response': f'OpenAI hatası: {str(e)}'})
+
+# YENI ENDPOINT: User profile kaydet/güncelle
+@app.route('/user/profile', methods=['POST'])
+def save_profile():
+    """Kullanıcı profili kaydet/güncelle - KALICI HAFIZA"""
+    try:
+        profile_data = request.json
+        save_or_update_user_profile(profile_data)
+        return jsonify({'status': 'success', 'message': 'Profile saved successfully'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+# YENI ENDPOINT: User profile getir
+@app.route('/user/profile', methods=['GET'])
+def fetch_profile():
+    """Kullanıcı profilini getir - KALICI HAFIZA"""
+    try:
+        profile = get_user_profile()
+        if profile:
+            return jsonify({'status': 'success', 'profile': profile})
+        else:
+            return jsonify({'status': 'error', 'message': 'Profile not found'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
 # WEB ARAYÜZÜ İÇİN - /api/chat endpoint (eski uyumluluk)
 @app.route('/api/chat', methods=['POST'])
 def chat_web():
     """Web arayüzü için endpoint"""
-    return chat_mobile()  # Aynı fonksiyonu kullan
+    return chat_mobile()
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'ok'})
+    return jsonify({'status': 'ok', 'memory_system': 'permanent'})
 
 if __name__ == '__main__':
     # Veritabanını başlat
     init_db()
-    print("✅ Veritabanı hazır!")
-    print("🚀 Backend başlatılıyor...")
-    print("📱 Mobil: /chat")
+    print("✅ Database ready with PERMANENT MEMORY SYSTEM!")
+    print("🧠 Users will be remembered from day 1!")
+    print("🚀 Backend starting...")
+    print("📱 Mobile: /chat")
+    print("👤 Profile: /user/profile (GET/POST)")
     print("🌐 Web: /api/chat")
     print("💚 Health: /health")
     
