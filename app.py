@@ -55,8 +55,73 @@ FUNCTIONS = [
             },
             "required": ["title", "date", "time"]
         }
+    },
+    {
+        "name": "web_search",
+        "description": "Güncel bilgi, haber, veya gerçek zamanlı veri gerektiğinde bu fonksiyonu çağır. Örnek: 'Bugün hava nasıl?', 'Dolar kuru kaç?', 'Son haberler neler?', 'iPhone 15 özellikleri'",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Arama sorgusu, kısa ve net (örn: 'İstanbul hava durumu', 'dolar kuru')"
+                },
+                "count": {
+                    "type": "integer",
+                    "description": "Kaç sonuç döndürülsün (varsayılan: 5)"
+                }
+            },
+            "required": ["query"]
+        }
     }
 ]
+
+# Brave Search helper
+def brave_search(query, count=5):
+    """Brave Search API ile arama yap"""
+    import requests
+    
+    api_key = os.getenv('BRAVE_SEARCH_API_KEY')
+    if not api_key:
+        return None
+    
+    try:
+        headers = {
+            'Accept': 'application/json',
+            'X-Subscription-Token': api_key
+        }
+        
+        params = {
+            'q': query,
+            'count': count,
+            'search_lang': 'tr'  # Türkçe öncelik
+        }
+        
+        response = requests.get(
+            'https://api.search.brave.com/res/v1/web/search',
+            headers=headers,
+            params=params,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            results = []
+            
+            # Web sonuçlarını işle
+            if 'web' in data and 'results' in data['web']:
+                for item in data['web']['results'][:count]:
+                    results.append({
+                        'title': item.get('title', ''),
+                        'description': item.get('description', ''),
+                        'url': item.get('url', '')
+                    })
+            
+            return results
+        return None
+    except Exception as e:
+        print(f"Brave Search Error: {e}")
+        return None
 
 # Database helper functions
 def get_db():
@@ -362,6 +427,12 @@ Bugünün tarihi: {turkey_time.strftime('%d %B %Y, %A')}
 - Belirsiz saatler için (sabah=09:00, öğle=12:00, akşam=18:00, gece=21:00 kullan)
 - Fonksiyonu çağırdıktan sonra kullanıcıya "Ajandana ekledim! ✅" gibi kısa bir onay ver
 
+ÖNEMLİ - WEB ARAMA:
+- Güncel bilgi, haber, hava durumu, döviz kuru, son gelişmeler sorulduğunda web_search fonksiyonunu çağır
+- "Bugün hava nasıl?", "Dolar kaç?", "Son haberler", "iPhone 15 özellikleri" gibi sorularda MUTLAKA ara
+- Arama sonuçlarını doğal bir dille kullanıcıya aktar
+- Kaynak belirt: "Arama sonuçlarına göre..."
+
 Kişiliğin:
 - Samimi, destekleyici ve eğlenceli
 - Kısa ve öz yanıtlar ver
@@ -397,13 +468,51 @@ Kişiliğin:
             print(f"🎯 Function Call: {function_name}")
             print(f"📋 Arguments: {function_args}")
             
+            # web_search fonksiyonu ise, sonuçları al ve AI'ya tekrar sor
+            if function_name == "web_search":
+                query = function_args.get('query', '')
+                count = function_args.get('count', 5)
+                
+                search_results = brave_search(query, count)
+                
+                if search_results:
+                    # Arama sonuçlarını formatlama
+                    results_text = f"Arama sonuçları '{query}' için:\n\n"
+                    for i, result in enumerate(search_results, 1):
+                        results_text += f"{i}. {result['title']}\n"
+                        results_text += f"   {result['description']}\n\n"
+                    
+                    # AI'ya sonuçları gönder, özet isteyalım
+                    messages.append({
+                        "role": "function",
+                        "name": "web_search",
+                        "content": results_text
+                    })
+                    
+                    # AI'dan sonuçları özetlemesini iste
+                    second_response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=messages,
+                        max_tokens=500,
+                        temperature=0.8,
+                    )
+                    
+                    ai_response = second_response.choices[0].message.content
+                    save_message('assistant', ai_response)
+                    return jsonify({'response': ai_response})
+                else:
+                    ai_response = f"Üzgünüm, '{query}' hakkında arama yapamadım. İnternet bağlantısı sorunlu olabilir."
+                    save_message('assistant', ai_response)
+                    return jsonify({'response': ai_response})
+            
+            # create_event veya diğer fonksiyonlar için Flutter'a gönder
             # AI'ın yanıtını da kaydet (varsa)
             if assistant_message.content:
                 save_message('assistant', assistant_message.content)
             
             # Flutter'a function call bilgisini gönder
             return jsonify({
-                "response": assistant_message.content or "Tamam, ekledim!",
+                "response": assistant_message.content or "Tamam!",
                 "function_call": {
                     "name": function_name,
                     "arguments": function_args
