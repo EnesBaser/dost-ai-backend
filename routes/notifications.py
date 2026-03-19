@@ -124,6 +124,71 @@ def scheduler_status():
 
 
 @notifications_bp.route('/api/notifications/trigger', methods=['POST'])
+
+@notifications_bp.route('/api/notifications/broadcast', methods=['POST'])
+@require_auth
+def broadcast_notification():
+    """Admin: Manuel başlık ve mesajla tüm kullanıcılara bildirim gönder."""
+    user     = request.user
+    is_admin = user.get('google_id') in ADMIN_GOOGLE_IDS
+    if not is_admin:
+        return jsonify({'error': 'Admin only'}), 403
+
+    data  = request.get_json()
+    title = data.get('title', '').strip()
+    body  = data.get('body', '').strip()
+
+    if not title or not body:
+        return jsonify({'error': 'Başlık ve mesaj gerekli'}), 400
+
+    import threading
+    def send_broadcast():
+        from database import get_db, release_db
+        conn = None
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, name, fcm_token
+                FROM users
+                WHERE
+                    fcm_token IS NOT NULL
+                    AND notifications_enabled = TRUE
+                    AND deleted_at IS NULL
+                    AND last_login_at >= NOW() - INTERVAL '7 days'
+                ORDER BY last_login_at DESC
+                LIMIT 500
+            """)
+            users = cursor.fetchall()
+            cursor.close()
+
+            success = 0
+            fail    = 0
+            for u in users:
+                from services.scheduler import send_push_notification, update_last_notified
+                sent = send_push_notification(
+                    fcm_token=u['fcm_token'],
+                    title=title,
+                    body=body,
+                    data={'type': 'broadcast', 'screen': 'chat'}
+                )
+                if sent:
+                    success += 1
+                else:
+                    fail += 1
+                import time
+                time.sleep(0.3)
+
+            print(f"📢 Broadcast bitti: {success} başarılı, {fail} başarısız", flush=True)
+        except Exception as e:
+            print(f"broadcast error: {e}", flush=True)
+        finally:
+            release_db(conn)
+
+    t = threading.Thread(target=send_broadcast, daemon=True)
+    t.start()
+
+    return jsonify({'success': True, 'message': 'Broadcast başlatıldı'})
 @require_auth
 def trigger_notification_job():
     """Admin: Manuel job tetikle — test için."""
