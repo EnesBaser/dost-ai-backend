@@ -268,6 +268,14 @@ def usage_stats():
         'cost_limit':  cost['max_cost'],
     })
 
+@user_bp.route('/admin')
+def admin_panel():
+    try:
+        with open('admin.html', 'r', encoding='utf-8') as f:
+            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except FileNotFoundError:
+        return "Admin panel not found", 404
+
 
 @user_bp.route('/api/subscription/upgrade', methods=['POST'])
 @require_auth
