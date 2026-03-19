@@ -145,7 +145,6 @@ def generate_personalized_notification(user, client):
         build_emotion_summary,
     )
     from services.router import get_weather_data, get_sports_data
-    from services.search import web_search
     from config import TURKEY_TZ
 
     user_id   = user['id']
@@ -157,11 +156,11 @@ def generate_personalized_notification(user, client):
         emotion_history = get_emotion_history(device_id, days=7)
 
         # ── Profil çıkar ──────────────────────────────────────────────────────
-        location   = None
-        favorite_team = None
-        health_issues = []
-        interests  = []
-        work_info  = None
+        location         = None
+        favorite_team    = None
+        health_issues    = []
+        interests        = []
+        work_info        = None
         important_events = []
 
         for fact in learned_facts:
@@ -169,7 +168,6 @@ def generate_personalized_notification(user, client):
             val        = fact.get('value', '')
             ctx        = fact.get('context') or val
             importance = float(fact.get('importance', 0.5))
-            frequency  = int(fact.get('frequency', 1))
 
             if cat == 'location' and not location and importance >= 0.7:
                 location = val
@@ -275,9 +273,9 @@ GÖREV ({greeting_hint}):
 {energy_hint}
 
 KURALLAR:
-- Sağlık sorunu varsa bunu nazikçe göz önünde bulundur
+- Sağlık sorunu varsa nazikçe göz önünde bulundur
 - Favori takımın maçı varsa/olduysa değin
-- Unutulan önemli bir konu varsa doğal şekilde sor
+- Unutulan önemli konu varsa doğal şekilde sor
 - Son duygu durumu üzgünse moral ver, mutluysa kutla
 - Bildirim kısa ve çekici olmalı
 - Robot gibi değil, gerçek bir dost gibi yaz
@@ -317,6 +315,47 @@ MESAJ: (maks 100 karakter)"""
             return f"Merhaba {user['name']}! 👋", "Öğleden sonra nasılsın?"
         else:
             return f"İyi akşamlar {user['name']}! 🌙", "Bugün nasıl geçti?"
+
+
+# ── Job ───────────────────────────────────────────────────────────────────────
+
+def run_notification_job(job_name="scheduled"):
+    from services.ai_service import get_client
+
+    turkey_time = datetime.now(TURKEY_TZ)
+    print(f"🔔 Notification job başladı ({job_name}): {turkey_time.strftime('%H:%M')}", flush=True)
+
+    client = get_client()
+    users  = get_users_for_notification()
+    print(f"📱 Bildirim gönderilecek: {len(users)} kullanıcı", flush=True)
+
+    success_count = 0
+    fail_count    = 0
+
+    for user in users:
+        try:
+            title, body = generate_personalized_notification(user, client)
+            if not title or not body:
+                continue
+            sent = send_push_notification(
+                fcm_token=user['fcm_token'],
+                title=title,
+                body=body,
+                data={'type': 'proactive', 'screen': 'chat', 'job': job_name}
+            )
+            if sent:
+                update_last_notified(user['id'])
+                success_count += 1
+            else:
+                fail_count += 1
+            time.sleep(0.3)
+        except Exception as e:
+            print(f"❌ Notification error user {user['id']}: {e}", flush=True)
+            fail_count += 1
+
+    print(f"✅ Job bitti: {success_count} başarılı, {fail_count} başarısız", flush=True)
+
+
 # ── Scheduler başlatma ────────────────────────────────────────────────────────
 
 def start_scheduler():
