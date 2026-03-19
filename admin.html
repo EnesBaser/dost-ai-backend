@@ -28,18 +28,20 @@
     }
     .login-card h1 { font-size: 28px; margin-bottom: 8px; }
     .login-card p { color: #94a3b8; margin-bottom: 28px; }
-    input[type="password"] {
+    input[type="password"], input[type="text"], textarea {
       width: 100%;
       padding: 12px 16px;
       background: #0f0f1a;
       border: 1px solid #334155;
       border-radius: 10px;
       color: #e2e8f0;
-      font-size: 16px;
-      margin-bottom: 16px;
+      font-size: 15px;
+      margin-bottom: 12px;
       outline: none;
+      font-family: inherit;
     }
-    input[type="password"]:focus { border-color: #9333ea; }
+    input:focus, textarea:focus { border-color: #9333ea; }
+    textarea { resize: vertical; min-height: 80px; }
     .btn {
       width: 100%;
       padding: 12px;
@@ -50,28 +52,13 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, #9333ea, #7c3aed);
-      color: white;
-    }
+    .btn-primary { background: linear-gradient(135deg, #9333ea, #7c3aed); color: white; }
     .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-danger {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-    }
-    .btn-success {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: white;
-    }
-    .btn-warning {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: white;
-    }
-    .btn-secondary {
-      background: #334155;
-      color: #e2e8f0;
-    }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+    .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+    .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
 
     .dashboard { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
     header {
@@ -85,7 +72,12 @@
     header h1 { font-size: 24px; }
     header span { color: #94a3b8; font-size: 14px; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
     .stat-card {
       background: #1a1a2e;
       border: 1px solid #1e293b;
@@ -103,9 +95,19 @@
       padding: 24px;
       margin-bottom: 20px;
     }
-    .section h2 { font-size: 17px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section h2 {
+      font-size: 17px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-    .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
     .action-btn {
       padding: 14px 16px;
       border: none;
@@ -118,9 +120,16 @@
       align-items: center;
       gap: 8px;
       justify-content: center;
+      color: white;
     }
     .action-btn:hover { transform: translateY(-2px); opacity: 0.9; }
     .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .action-btn.purple { background: linear-gradient(135deg, #9333ea, #7c3aed); }
+    .action-btn.green  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .action-btn.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .action-btn.gray   { background: #334155; }
+    .action-btn.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .action-btn.red    { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
     .log {
       background: #0f0f1a;
@@ -129,14 +138,14 @@
       padding: 16px;
       font-family: monospace;
       font-size: 13px;
-      max-height: 300px;
+      max-height: 250px;
       overflow-y: auto;
       margin-top: 16px;
     }
-    .log-entry { padding: 4px 0; border-bottom: 1px solid #1e293b11; }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid #1e293b22; }
     .log-entry.success { color: #22c55e; }
-    .log-entry.error { color: #ef4444; }
-    .log-entry.info { color: #60a5fa; }
+    .log-entry.error   { color: #ef4444; }
+    .log-entry.info    { color: #60a5fa; }
     .log-entry.warning { color: #f59e0b; }
 
     .toast {
@@ -153,7 +162,7 @@
     }
     .toast.show { opacity: 1; }
     .toast.success { background: #22c55e; color: white; }
-    .toast.error { background: #ef4444; color: white; }
+    .toast.error   { background: #ef4444; color: white; }
 
     .badge {
       display: inline-block;
@@ -162,8 +171,8 @@
       font-size: 11px;
       font-weight: 600;
     }
-    .badge-green { background: #22c55e22; color: #22c55e; }
-    .badge-red { background: #ef444422; color: #ef4444; }
+    .badge-green  { background: #22c55e22; color: #22c55e; }
+    .badge-red    { background: #ef444422; color: #ef4444; }
     .badge-purple { background: #9333ea22; color: #9333ea; }
 
     .scheduler-info {
@@ -182,6 +191,45 @@
     }
     .job-card .job-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
     .job-card .job-next { font-size: 12px; color: #94a3b8; }
+
+    .broadcast-form label {
+      display: block;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      margin-top: 12px;
+    }
+    .char-count {
+      font-size: 11px;
+      color: #64748b;
+      text-align: right;
+      margin-top: -8px;
+      margin-bottom: 8px;
+    }
+    .char-count.warn { color: #f59e0b; }
+    .char-count.over { color: #ef4444; }
+    .preview-box {
+      background: #0f0f1a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px 0;
+      display: none;
+    }
+    .preview-box .preview-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .preview-box .preview-body {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .preview-box .preview-label {
+      font-size: 11px;
+      color: #9333ea;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -191,7 +239,8 @@
   <div class="login-card">
     <h1>🤖 DostAI</h1>
     <p>Admin Paneli</p>
-    <input type="password" id="adminPassword" placeholder="Şifre" onkeydown="if(event.key==='Enter') login()">
+    <input type="password" id="adminPassword" placeholder="Şifre"
+           onkeydown="if(event.key==='Enter') login()">
     <button class="btn btn-primary" onclick="login()">Giriş Yap</button>
   </div>
 </div>
@@ -205,21 +254,23 @@
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <span class="badge badge-green" id="serverStatus">● Kontrol ediliyor...</span>
-      <button class="btn btn-secondary" style="width:auto;padding:8px 16px;font-size:13px;" onclick="logout()">Çıkış</button>
+      <button class="btn btn-secondary"
+              style="width:auto;padding:8px 16px;font-size:13px;"
+              onclick="logout()">Çıkış</button>
     </div>
   </header>
 
   <!-- Stats -->
-  <div class="grid" id="statsGrid">
+  <div class="grid">
     <div class="stat-card">
-      <div class="label">Sunucu Durumu</div>
+      <div class="label">Backend Versiyonu</div>
       <div class="value" id="statVersion">—</div>
-      <div class="sub">Backend versiyonu</div>
+      <div class="sub">Sunucu durumu</div>
     </div>
     <div class="stat-card">
       <div class="label">Scheduler</div>
       <div class="value" id="statScheduler">—</div>
-      <div class="sub">APScheduler durumu</div>
+      <div class="sub">APScheduler</div>
     </div>
     <div class="stat-card">
       <div class="label">TR Saati</div>
@@ -228,38 +279,55 @@
     </div>
   </div>
 
-  <!-- Bildirimler -->
+  <!-- Manuel Broadcast -->
   <div class="section">
-    <h2>🔔 Bildirim Yönetimi</h2>
-    <div class="action-grid">
-      <button class="action-btn btn-primary" onclick="triggerNotification()">
-        📤 Tüm Kullanıcılara Gönder
-      </button>
-      <button class="action-btn btn-success" onclick="testNotification()">
-        🧪 Bana Test Gönder
-      </button>
-      <button class="action-btn btn-secondary" onclick="checkScheduler()">
-        🔄 Scheduler Durumu
-      </button>
+    <h2>📢 Manuel Bildirim Gönder</h2>
+    <div class="broadcast-form">
+      <label>Başlık <small>(maks 45 karakter)</small></label>
+      <input type="text" id="broadcastTitle" placeholder="Örn: Yeni özellik! 🎉"
+             maxlength="45" oninput="updatePreview(); updateCharCount('broadcastTitle', 45, 'titleCount')">
+      <div class="char-count" id="titleCount">0 / 45</div>
+
+      <label>Mesaj <small>(maks 100 karakter)</small></label>
+      <textarea id="broadcastBody" placeholder="Örn: DostAI'de yeni bir şeyler var, gel bir bak!"
+                maxlength="100" oninput="updatePreview(); updateCharCount('broadcastBody', 100, 'bodyCount')"></textarea>
+      <div class="char-count" id="bodyCount">0 / 100</div>
+
+      <div class="preview-box" id="previewBox">
+        <div class="preview-label">📱 Önizleme</div>
+        <div class="preview-title" id="previewTitle">—</div>
+        <div class="preview-body" id="previewBody">—</div>
+      </div>
+
+      <div class="action-grid" style="margin-top: 12px;">
+        <button class="action-btn red" onclick="broadcastToAll()">
+          📤 Tüm Kullanıcılara Gönder
+        </button>
+        <button class="action-btn green" onclick="testBroadcast()">
+          🧪 Önce Bana Test Et
+        </button>
+      </div>
     </div>
-    <div class="log" id="notifLog">
-      <div class="log-entry info">— Bildirim logları burada görünecek —</div>
+    <div class="log" id="broadcastLog">
+      <div class="log-entry info">— Manuel bildirim logları burada görünecek —</div>
     </div>
   </div>
 
-  <!-- Sistem -->
+  <!-- Otomatik Bildirimler -->
   <div class="section">
-    <h2>⚙️ Sistem</h2>
+    <h2>🔔 Otomatik Bildirim (Kişiselleştirilmiş)</h2>
     <div class="action-grid">
-      <button class="action-btn btn-secondary" onclick="checkHealth()">
-        💚 Health Check
+      <button class="action-btn purple" onclick="triggerNotification()">
+        🤖 Kişiselleştirilmiş Gönder
       </button>
-      <button class="action-btn btn-warning" onclick="clearLog()">
-        🗑️ Logları Temizle
+      <button class="action-btn green" onclick="testNotification()">
+        🧪 Bana Test Gönder
+      </button>
+      <button class="action-btn blue" onclick="checkScheduler()">
+        🔄 Scheduler Durumu
       </button>
     </div>
 
-    <!-- Scheduler jobs -->
     <div class="scheduler-info" id="schedulerInfo" style="display:none;">
       <div class="job-card">
         <div class="job-name">☀️ Sabah Bildirimi</div>
@@ -270,34 +338,47 @@
         <div class="job-next" id="afternoonNext">—</div>
       </div>
     </div>
+
+    <div class="log" id="notifLog">
+      <div class="log-entry info">— Otomatik bildirim logları burada görünecek —</div>
+    </div>
+  </div>
+
+  <!-- Sistem -->
+  <div class="section">
+    <h2>⚙️ Sistem</h2>
+    <div class="action-grid">
+      <button class="action-btn blue" onclick="checkHealth()">
+        💚 Health Check
+      </button>
+      <button class="action-btn gray" onclick="clearAllLogs()">
+        🗑️ Logları Temizle
+      </button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  const BASE_URL = window.location.origin;
-  const GOOGLE_ID = '117096745782071439494';
-  const ADMIN_PASSWORD = 'dostai2026';  // Basit şifre — istersen değiştir
+  const BASE_URL   = window.location.origin;
+  const GOOGLE_ID  = '117096745782071439494';
+  const ADMIN_PWD  = 'dostai2026';
 
-  let isLoggedIn = false;
-
-  // ── Zaman ────────────────────────────────────────────────────────────────
+  // ── Zaman ──────────────────────────────────────────────────────────────────
   function updateTime() {
-    const now = new Date();
     document.getElementById('currentTime').textContent =
-      now.toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });
+      new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });
   }
   setInterval(updateTime, 1000);
   updateTime();
 
-  // ── Login ─────────────────────────────────────────────────────────────────
+  // ── Login ──────────────────────────────────────────────────────────────────
   function login() {
     const pwd = document.getElementById('adminPassword').value;
-    if (pwd === ADMIN_PASSWORD) {
-      isLoggedIn = true;
+    if (pwd === ADMIN_PWD) {
       document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('dashboard').style.display  = 'block';
       checkHealth();
       checkScheduler();
     } else {
@@ -307,21 +388,22 @@
   }
 
   function logout() {
-    isLoggedIn = false;
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('dashboard').style.display   = 'none';
     document.getElementById('adminPassword').value = '';
   }
 
-  // ── API ───────────────────────────────────────────────────────────────────
-  async function apiPost(endpoint) {
-    const res = await fetch(BASE_URL + endpoint, {
+  // ── API ────────────────────────────────────────────────────────────────────
+  async function apiPost(endpoint, body = null) {
+    const opts = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Google-ID': GOOGLE_ID,
+        'X-Google-ID':  GOOGLE_ID,
       },
-    });
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(BASE_URL + endpoint, opts);
     return res.json();
   }
 
@@ -332,44 +414,119 @@
     return res.json();
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
+  // ── Karakter sayacı ────────────────────────────────────────────────────────
+  function updateCharCount(inputId, max, countId) {
+    const len  = document.getElementById(inputId).value.length;
+    const el   = document.getElementById(countId);
+    el.textContent = `${len} / ${max}`;
+    el.className = 'char-count' +
+      (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+  }
+
+  function updatePreview() {
+    const title = document.getElementById('broadcastTitle').value.trim();
+    const body  = document.getElementById('broadcastBody').value.trim();
+    const box   = document.getElementById('previewBox');
+
+    if (title || body) {
+      box.style.display = 'block';
+      document.getElementById('previewTitle').textContent = title || '(başlık yok)';
+      document.getElementById('previewBody').textContent  = body  || '(mesaj yok)';
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  // ── Manuel broadcast ───────────────────────────────────────────────────────
+  async function broadcastToAll() {
+    const title = document.getElementById('broadcastTitle').value.trim();
+    const body  = document.getElementById('broadcastBody').value.trim();
+
+    if (!title || !body) {
+      showToast('Başlık ve mesaj gerekli!', 'error');
+      return;
+    }
+
+    const confirm = window.confirm(
+      `Tüm aktif kullanıcılara şu bildirim gönderilecek:\n\n"${title}"\n${body}\n\nDevam edilsin mi?`
+    );
+    if (!confirm) return;
+
+    addLog('broadcastLog', '📤 Broadcast gönderiliyor...', 'info');
+    try {
+      const data = await apiPost('/api/notifications/broadcast', { title, body });
+      if (data.success) {
+        addLog('broadcastLog', '✅ Broadcast başlatıldı!', 'success');
+        showToast('Broadcast gönderildi!', 'success');
+      } else {
+        addLog('broadcastLog', '❌ Hata: ' + JSON.stringify(data), 'error');
+      }
+    } catch (e) {
+      addLog('broadcastLog', '❌ Bağlantı hatası: ' + e, 'error');
+    }
+  }
+
+  async function testBroadcast() {
+    const title = document.getElementById('broadcastTitle').value.trim();
+    const body  = document.getElementById('broadcastBody').value.trim();
+
+    if (!title || !body) {
+      showToast('Başlık ve mesaj gerekli!', 'error');
+      return;
+    }
+
+    addLog('broadcastLog', '🧪 Test bildirimi gönderiliyor...', 'info');
+    try {
+      const data = await apiPost('/api/notifications/broadcast-test', { title, body });
+      if (data.success) {
+        addLog('broadcastLog', '✅ Test gönderildi!', 'success');
+        showToast('Test bildirimi geldi!', 'success');
+      } else {
+        addLog('broadcastLog', '❌ Hata: ' + JSON.stringify(data), 'error');
+      }
+    } catch (e) {
+      addLog('broadcastLog', '❌ Bağlantı hatası: ' + e, 'error');
+    }
+  }
+
+  // ── Otomatik bildirimler ───────────────────────────────────────────────────
   async function triggerNotification() {
-    addLog('📤 Tüm kullanıcılara bildirim gönderiliyor...', 'info');
+    addLog('notifLog', '🤖 Kişiselleştirilmiş bildirim gönderiliyor...', 'info');
     try {
       const data = await apiPost('/api/notifications/trigger');
       if (data.success) {
-        addLog('✅ Job başlatıldı — Railway loglarını kontrol et', 'success');
-        showToast('Bildirim job\'ı başlatıldı!', 'success');
+        addLog('notifLog', '✅ Job başlatıldı', 'success');
+        showToast('Kişiselleştirilmiş bildirim gönderildi!', 'success');
       } else {
-        addLog('❌ Hata: ' + JSON.stringify(data), 'error');
+        addLog('notifLog', '❌ Hata: ' + JSON.stringify(data), 'error');
       }
     } catch (e) {
-      addLog('❌ Bağlantı hatası: ' + e, 'error');
+      addLog('notifLog', '❌ Bağlantı hatası: ' + e, 'error');
     }
   }
 
   async function testNotification() {
-    addLog('🧪 Test bildirimi gönderiliyor...', 'info');
+    addLog('notifLog', '🧪 Test bildirimi gönderiliyor...', 'info');
     try {
       const data = await apiPost('/api/notifications/test');
       if (data.success) {
-        addLog(`✅ Gönderildi!`, 'success');
-        addLog(`📌 Başlık: ${data.title}`, 'info');
-        addLog(`💬 Mesaj: ${data.body}`, 'info');
-        showToast('Test bildirimi gönderildi!', 'success');
+        addLog('notifLog', '✅ Gönderildi!', 'success');
+        addLog('notifLog', `📌 Başlık: ${data.title}`, 'info');
+        addLog('notifLog', `💬 Mesaj: ${data.body}`, 'info');
+        showToast('Test bildirimi geldi!', 'success');
       } else {
-        addLog('❌ Hata: ' + JSON.stringify(data), 'error');
+        addLog('notifLog', '❌ Hata: ' + JSON.stringify(data), 'error');
       }
     } catch (e) {
-      addLog('❌ Bağlantı hatası: ' + e, 'error');
+      addLog('notifLog', '❌ Bağlantı hatası: ' + e, 'error');
     }
   }
 
   async function checkScheduler() {
     try {
       const data = await apiGet('/api/scheduler/status');
-      const status = data.running ? '🟢 Aktif' : '🔴 Durdu';
-      document.getElementById('statScheduler').textContent = status;
+      document.getElementById('statScheduler').textContent =
+        data.running ? '🟢 Aktif' : '🔴 Durdu';
       document.getElementById('statTRTime').textContent = data.turkey_time || '—';
 
       if (data.jobs && data.jobs.length > 0) {
@@ -384,10 +541,9 @@
             document.getElementById('afternoonNext').textContent = 'Sonraki: ' + nextRun;
           }
         });
-        addLog(`🔄 Scheduler: ${status} | ${data.jobs.length} job aktif`, 'info');
       }
     } catch (e) {
-      addLog('❌ Scheduler kontrol hatası: ' + e, 'error');
+      addLog('notifLog', '❌ Scheduler kontrol hatası: ' + e, 'error');
     }
   }
 
@@ -395,37 +551,37 @@
     try {
       const data = await apiGet('/health');
       if (data.status === 'ok') {
-        document.getElementById('serverStatus').textContent = '● Online';
-        document.getElementById('serverStatus').className = 'badge badge-green';
-        document.getElementById('statVersion').textContent = data.version || '—';
-        addLog('💚 Sunucu sağlıklı: ' + data.version, 'success');
+        document.getElementById('serverStatus').textContent  = '● Online';
+        document.getElementById('serverStatus').className    = 'badge badge-green';
+        document.getElementById('statVersion').textContent   = data.version || '—';
       }
     } catch (e) {
       document.getElementById('serverStatus').textContent = '● Offline';
-      document.getElementById('serverStatus').className = 'badge badge-red';
-      addLog('❌ Sunucu erişilemiyor!', 'error');
+      document.getElementById('serverStatus').className   = 'badge badge-red';
     }
   }
 
-  function clearLog() {
-    document.getElementById('notifLog').innerHTML =
-      '<div class="log-entry info">— Log temizlendi —</div>';
+  function clearAllLogs() {
+    ['broadcastLog', 'notifLog'].forEach(id => {
+      document.getElementById(id).innerHTML =
+        '<div class="log-entry info">— Log temizlendi —</div>';
+    });
   }
 
-  // ── Log ───────────────────────────────────────────────────────────────────
-  function addLog(message, type = 'info') {
-    const log = document.getElementById('notifLog');
-    const now = new Date().toLocaleTimeString('tr-TR');
+  // ── Log ────────────────────────────────────────────────────────────────────
+  function addLog(logId, message, type = 'info') {
+    const log   = document.getElementById(logId);
+    const now   = new Date().toLocaleTimeString('tr-TR');
     const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
+    entry.className   = `log-entry ${type}`;
     entry.textContent = `[${now}] ${message}`;
     log.appendChild(entry);
     log.scrollTop = log.scrollHeight;
   }
 
-  // ── Toast ─────────────────────────────────────────────────────────────────
+  // ── Toast ──────────────────────────────────────────────────────────────────
   function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
+    const toast     = document.getElementById('toast');
     toast.textContent = message;
     toast.className = `toast ${type} show`;
     setTimeout(() => toast.className = 'toast', 3000);
@@ -433,15 +589,3 @@
 </script>
 </body>
 </html>
-```
-
----
-
-İki şey ekle:
-
-1. `admin.html` dosyasını `dost-ai-backend` reposuna ekle
-2. `routes/user.py`'e `/admin` route'unu ekle
-
-Deploy sonrası şu adresten erişirsin:
-```
-https://dost-ai-backend-v2-production.up.railway.app/admin
