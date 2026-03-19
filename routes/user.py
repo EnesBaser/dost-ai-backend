@@ -211,6 +211,45 @@ def user_profile():
         return jsonify({'success': True})
     return jsonify({'error': 'Profile update failed'}), 500
 
+@user_bp.route('/api/my-facts/delete', methods=['POST'])
+@require_auth
+def delete_facts():
+    """Seçili fact'leri veya tümünü sil."""
+    conn = None
+    try:
+        user      = request.user
+        data      = request.get_json()
+        delete_all = data.get('delete_all', False)
+        fact_keys  = data.get('fact_keys', [])  # [{"category": "health", "key": "kronik kalp"}]
+        device_id  = user.get('device_id') or str(user['id'])
+
+        conn   = get_db()
+        cursor = conn.cursor()
+
+        if delete_all:
+            cursor.execute(
+                "DELETE FROM user_facts WHERE device_id = %s",
+                (str(device_id),)
+            )
+        elif fact_keys:
+            for item in fact_keys:
+                cursor.execute("""
+                    DELETE FROM user_facts
+                    WHERE device_id = %s
+                      AND category = %s
+                      AND fact_key = %s
+                """, (str(device_id), item['category'], item['key']))
+
+        conn.commit()
+        cursor.close()
+        return jsonify({'success': True, 'deleted': len(fact_keys) if not delete_all else 'all'})
+
+    except Exception as e:
+        print(f"delete_facts error: {e}", flush=True)
+        return jsonify({'error': str(e)}), 500
+    finally:
+        release_db(conn)
+
 
 @user_bp.route('/usage', methods=['GET'])
 @require_auth
