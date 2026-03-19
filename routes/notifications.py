@@ -14,6 +14,44 @@ notifications_bp = Blueprint('notifications', __name__)
 
 
 @notifications_bp.route('/api/register-token', methods=['POST'])
+
+@notifications_bp.route('/api/notifications/broadcast-test', methods=['POST'])
+@require_auth
+def broadcast_test():
+    """Admin: Broadcast mesajını sadece admin'e test gönder."""
+    user     = request.user
+    is_admin = user.get('google_id') in ADMIN_GOOGLE_IDS
+    if not is_admin:
+        return jsonify({'error': 'Admin only'}), 403
+
+    conn = None
+    try:
+        data  = request.get_json()
+        title = data.get('title', '').strip()
+        body  = data.get('body', '').strip()
+
+        if not title or not body:
+            return jsonify({'error': 'Başlık ve mesaj gerekli'}), 400
+
+        conn   = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT fcm_token FROM users WHERE id = %s", (user['id'],))
+        row = cursor.fetchone()
+        cursor.close()
+
+        if not row or not row['fcm_token']:
+            return jsonify({'error': 'FCM token bulunamadı'}), 400
+
+        from services.scheduler import send_push_notification
+        sent = send_push_notification(
+            row['fcm_token'], title, body,
+            {'type': 'broadcast_test', 'screen': 'chat'}
+        )
+        return jsonify({'success': sent})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        release_db(conn)
 @require_auth
 def register_fcm_token():
     conn = None
