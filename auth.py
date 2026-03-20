@@ -1,11 +1,12 @@
 # auth.py
-import json
 import traceback as tb
 from functools import wraps
+from urllib.parse import unquote
 from flask import request, jsonify
 import sentry_sdk
 from config import ADMIN_GOOGLE_IDS, SENTRY_DSN
 from database import get_db, release_db
+
 
 def get_or_create_user(device_id, name=None, google_id=None, email=None):
     conn = None
@@ -67,6 +68,7 @@ def get_or_create_user(device_id, name=None, google_id=None, email=None):
     finally:
         release_db(conn)
 
+
 def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -74,7 +76,13 @@ def require_auth(f):
         device_id = request.headers.get('X-Device-ID') or (json_body.get('device_id') if json_body else None)
         google_id  = request.headers.get('X-Google-ID')
         email      = request.headers.get('X-Google-Email')
-        name       = request.headers.get('X-Google-Name')
+
+        # Türkçe karakterleri decode et
+        raw_name = request.headers.get('X-Google-Name')
+        try:
+            name = unquote(raw_name) if raw_name else None
+        except Exception:
+            name = raw_name
 
         if not device_id and not google_id:
             return jsonify({'error': 'Auth required'}), 401
