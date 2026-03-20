@@ -1,135 +1,101 @@
-# app.py — DostAI Backend v2.8
-import time
+# auth.py
+import traceback as tb
+from functools import wraps
+from urllib.parse import unquote
+from flask import request, jsonify
 import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
-from flask import Flask, jsonify, g, request
-from flask_sock import Sock
-from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from config import ADMIN_GOOGLE_IDS, SENTRY_DSN
+from database import get_db, release_db
 
-from config import SENTRY_DSN, REDIS_URL
-from database import init_db_pool, run_migrations
-from services.scheduler import init_firebase, start_scheduler
-from services.ai_service import get_client
 
-from routes.chat          import chat_bp
-from routes.user          import user_bp
-from routes.media         import media_bp
-from routes.notifications import notifications_bp
-from routes.websocket     import register_websocket
-
-# ── Sentry ────────────────────────────────────────────────────────────────────
-if SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[FlaskIntegration()],
-        traces_sample_rate=0.1,
-        profiles_sample_rate=0.1,
-        environment="production",
-        release="dostai-backend@2.8.0",
-    )
-    print("✅ Sentry monitoring enabled!")
-else:
-    print("⚠️ Sentry DSN not found - monitoring disabled")
-
-# ── Flask ─────────────────────────────────────────────────────────────────────
-app  = Flask(__name__)
-CORS(app)
-sock = Sock(app)
-
-# ── Rate limiter ──────────────────────────────────────────────────────────────
-def get_device_id():
+def get_or_create_user(device_id, name=None, google_id=None, email=None):
+    conn = None
     try:
-        json_body   = request.get_json(silent=True)
-        json_device = json_body.get('device_id') if json_body else None
-    except Exception:
-        json_device = None
-    google_id = request.headers.get('X-Google-ID')
-    device_id = request.headers.get('X-Device-ID') or json_device or get_remote_address()
-    return google_id or device_id
+        conn = get_db()
+        cursor = conn.cursor()
 
-limiter = Limiter(
-    app=app,
-    key_func=get_device_id,
-    default_limits=["1000 per day", "200 per hour"],
-    storage_uri=REDIS_URL,
-)
-
-# ── Blueprints ────────────────────────────────────────────────────────────────
-app.register_blueprint(chat_bp)
-app.register_blueprint(user_bp)
-app.register_blueprint(media_bp)
-app.register_blueprint(notifications_bp)
-register_websocket(sock)
-
-# ── Learning system ───────────────────────────────────────────────────────────
-try:
-    from learning_routes import register_learning_routes
-    register_learning_routes(app)
-    print("✅ Learning System routes registered!")
-except ImportError as e:
-    print(f"⚠️ Learning system not available: {e}")
-
-# ── Monitoring ────────────────────────────────────────────────────────────────
-@app.before_request
-def before_request():
-    g.start_time = time.time()
-
-@app.after_request
-def after_request(response):
-    if hasattr(g, 'start_time'):
-        duration = time.time() - g.start_time
-        if duration > 2.0 and SENTRY_DSN:
-            sentry_sdk.capture_message(
-                f"Slow request: {request.endpoint}", level="warning",
-                extras={"duration": duration, "endpoint": request.endpoint}
+        if google_id:
+            cursor.execute(
+                "SELECT * FROM users WHERE google_id = %s AND deleted_at IS NULL", (google_id,)
             )
-        response.headers['X-Response-Time'] = f"{duration:.3f}s"
-    return response
+            user = cursor.fetchone()
+            if user:
+                cursor.execute(
+                    "UPDATE users SET last_login_at = NOW(), device_id = %s, email = %s WHERE id = %s",
+                    (device_id, email, user['id'])
+                )
+                conn.commit()
+                cursor.close()
+                return dict(user)
 
-# ── Temel route'lar ───────────────────────────────────────────────────────────
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({
-        'status':   'ok',
-        'version':  '2.8.0-production',
-        'database': 'postgresql',
-    })
+        cursor.execute(
+            "SELECT * FROM users WHERE device_id = %s AND deleted_at IS NULL", (device_id,)
+        )
+        user = cursor.fetchone()
+        if user:
+            if google_id and not user.get('google_id'):
+                cursor.execute(
+                    "UPDATE users SET last_login_at = NOW(), google_id = %s, email = %s WHERE id = %s",
+                    (google_id, email, user['id'])
+                )
+            else:
+                cursor.execute(
+                    "UPDATE users SET last_login_at = NOW(), email = COALESCE(%s, email) WHERE id = %s",
+                    (email, user['id'])
+                )
+            conn.commit()
+            cursor.close()
+            return dict(user)
 
-@app.route('/')
-def home():
-    return jsonify({'status': 'ok', 'service': 'DostAI Backend v2.8'})
+        user_name = name or "Arkadaşım"
+        cursor.execute("""
+            INSERT INTO users (device_id, google_id, email, name, subscription_tier, subscription_status)
+            VALUES (%s, %s, %s, %s, 'free', 'active') RETURNING *
+        """, (device_id, google_id, email, user_name))
+        new_user = cursor.fetchone()
+        conn.commit()
+        cursor.execute("INSERT INTO user_profiles (user_id) VALUES (%s)", (new_user['id'],))
+        conn.commit()
+        cursor.close()
+        print(f"✅ Yeni kullanıcı: {device_id} | google: {google_id}")
+        return dict(new_user)
 
-@app.route('/privacy-policy')
-def privacy_policy():
-    try:
-        with open('privacy-policy.html', 'r', encoding='utf-8') as f:
-            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
-    except FileNotFoundError:
-        return "Privacy Policy", 200
+    except Exception as e:
+        if conn:
+            try: conn.rollback()
+            except: pass
+        raise
+    finally:
+        release_db(conn)
 
-# ── Başlatma ──────────────────────────────────────────────────────────────────
-try:
-    init_db_pool()
-except Exception as e:
-    print(f"⚠️ Pool başlatılamadı, lazy init kullanılacak: {e}")
 
-try:
-    run_migrations()
-except Exception as e:
-    print(f"⚠️ Migration skip: {e}")
+def require_auth(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        json_body = request.get_json(silent=True)
+        device_id = request.headers.get('X-Device-ID') or (json_body.get('device_id') if json_body else None)
+        google_id  = request.headers.get('X-Google-ID')
+        email      = request.headers.get('X-Google-Email')
 
-try:
-    get_client()
-except Exception as e:
-    print(f"⚠️ OpenAI client başlatılamadı: {e}")
+        # Türkçe karakterleri decode et
+        raw_name = request.headers.get('X-Google-Name')
+        try:
+            name = unquote(raw_name) if raw_name else None
+        except Exception:
+            name = raw_name
 
-init_firebase()
-start_scheduler()
+        if not device_id and not google_id:
+            return jsonify({'error': 'Auth required'}), 401
 
-# ── Entry point ───────────────────────────────────────────────────────────────
-if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
+        identifier = device_id or google_id
+        try:
+            user = get_or_create_user(identifier, name=name, google_id=google_id, email=email)
+            request.user = user
+            if SENTRY_DSN:
+                sentry_sdk.set_user({"id": str(user['id']), "tier": user['subscription_tier']})
+            return f(*args, **kwargs)
+        except Exception as e:
+            print(f"Auth error: {e}", flush=True)
+            print(tb.format_exc(), flush=True)
+            return jsonify({'error': f'Auth error: {str(e)}'}), 500
+    return decorated_function
