@@ -18,13 +18,131 @@ SPORT_TRIGGERS = [
     'basketbol', 'süper lig', 'super lig', 'champions league',
     'şampiyonlar ligi', 'avrupa ligi', 'uefa', 'dün', 'dun',
     'bu hafta', 'geçen hafta', 'gecen hafta', 'son maç', 'son mac',
+    'transfer', 'teknik direktör', 'teknik direktor', 'forma',
+    'deplasman', 'stat', 'hakem', 'kırmızı kart', 'kirmizi kart',
+    'penaltı', 'penalti', 'uzatma', 'ilk yarı', 'ilk yari',
+    'golcü', 'golcu', 'asist', 'fikstür', 'fikstur',
+    'nba', 'euroleague', 'formula', 'f1', 'tenis', 'voleybol',
 ]
 
-TIME_TRIGGERS = ['dün', 'dun', 'bu hafta', 'geçen hafta', 'gecen hafta', 'son maç', 'son mac']
+TIME_TRIGGERS = [
+    'dün', 'dun', 'bu hafta', 'geçen hafta', 'gecen hafta',
+    'son maç', 'son mac', 'bugün', 'bu gece', 'akşam',
+]
 
+# ── Güncellik gerektiren sorgular ─────────────────────────────────────────────
+
+RECENCY_TRIGGERS = [
+    'bugün', 'bugun', 'dün', 'dun', 'bu hafta', 'bu ay',
+    'son dakika', 'şu an', 'su an', 'şimdi', 'simdi',
+    'güncel', 'guncel', 'son gelişme', 'son gelisme',
+    'haber', 'haberler', 'deprem', 'trafik', 'grev',
+    'seçim', 'secim', 'bist', 'borsa', 'altın fiyat', 'altin fiyat',
+    'dolar kuru', 'euro kuru', 'akşam', 'sabah', 'gece',
+    'yeni çıktı', 'yeni cikti', 'son sürüm', 'son surum',
+    'yeni sezon', 'vizyonda', 'bu gece', 'yarın', 'yarin',
+]
+
+
+def needs_recency(message_lower):
+    return any(t in message_lower for t in RECENCY_TRIGGERS)
+
+
+# ── Soru kalıpları ────────────────────────────────────────────────────────────
+
+QUESTION_PATTERNS = [
+    r'\?',
+    r'^(ne|kim|nasıl|neden|nerede|hangi|kaç|kaçta|ne zaman|ne kadar)',
+    r'(nedir|kimdir|nerede|hangisi|nasıl|neden|niçin)',
+    r'(söyle|anlat|açıkla|bilgi ver|araştır|bul|göster)',
+    r'(var mı|yok mu|oldu mu|geldi mi|çıktı mı|açık mı|kapalı mı)',
+    r'(en iyi|en ucuz|en pahalı|en yeni|tavsiye|öneri|önerir misin)',
+    r'(hakkında|ile ilgili|konusunda)',
+]
+
+
+def is_question(message):
+    msg_lower = message.lower()
+    return any(re.search(p, msg_lower) for p in QUESTION_PATTERNS)
+
+
+# ── Web search gerektiren konular ─────────────────────────────────────────────
+
+WEB_SEARCH_TRIGGERS = [
+    # Haberler & güncel
+    'haber', 'son dakika', 'güncel', 'bugün ne oldu', 'gelişme',
+    'deprem', 'trafik', 'grev', 'seçim', 'secim', 'referandum',
+    'saldırı', 'saldiri', 'kaza', 'yangın', 'yangin', 'sel', 'fırtına',
+
+    # Etkinlik & eğlence
+    'etkinlik', 'konser', 'sergi', 'festival', 'tiyatro', 'müze',
+    'sinema', 'vizyonda', 'ne zaman', 'nerede', 'açık mı', 'kapalı mı',
+    'bilet', 'rezervasyon', 'program', 'takvim',
+    'yeni çıktı', 'yeni album', 'yeni film', 'yeni sezon', 'yeni bölüm',
+    'fragman', 'trailer', 'cast', 'oyuncu kadrosu',
+
+    # Finans & ekonomi
+    'altın', 'altin', 'gram altın', 'çeyrek', 'yarım altın',
+    'gümüş', 'gumus', 'petrol', 'brent', 'bist', 'borsa',
+    'faiz', 'enflasyon', 'ekonomi', 'dolar', 'euro', 'döviz', 'kur',
+    'hisse', 'fiyat', 'fiyatı ne', 'kaç para', 'ne kadar',
+
+    # Kişi & kurumlar
+    'kimdir', 'kim', 'biyografi', 'hayatı', 'hayati',
+    'firma', 'şirket', 'sirket', 'hakkında', 'hakkinda',
+    'telefon', 'adres', 'web sitesi', 'iletişim', 'iletisim',
+    'çalışma saatleri', 'calisma saatleri', 'açılış', 'kapanış',
+
+    # Bilgi & araştırma
+    'nedir', 'ne demek', 'anlamı', 'anlami', 'tanımı', 'tanimi',
+    'nasıl yapılır', 'nasil yapilir', 'nasıl çalışır', 'nasil calisir',
+    'araştır', 'arastir', 'bilgi ver', 'anlat', 'açıkla', 'acikla',
+    'tarihçe', 'tarihce', 'kuruluş', 'kurulus',
+
+    # Sağlık & yaşam
+    'belirtileri', 'tedavisi', 'ilaç', 'ilac', 'doktor', 'hastane',
+    'diyet', 'kalori', 'beslenme', 'egzersiz', 'spor salonu',
+    'tarif', 'tarifi', 'malzeme', 'nasıl pişirilir',
+
+    # Teknoloji
+    'yeni model', 'özellikleri', 'ozellikleri', 'inceleme', 'review',
+    'güncelleme', 'guncelleme', 'uygulama', 'yazılım', 'yazilim',
+    'nasıl kurulur', 'nasil kurulur', 'nasıl kullanılır',
+    'fiyatı', 'fiyati', 'çıkış tarihi', 'cikis tarihi',
+
+    # Seyahat & ulaşım
+    'uçuş', 'ucus', 'sefer', 'otobüs', 'otobus', 'tren', 'metro',
+    'otel', 'konaklama', 'vize', 'pasaport', 'giriş şartları',
+    'turistik', 'gezilecek', 'görülecek', 'gorulecek',
+    'mesafe', 'yol tarifi', 'navigasyon',
+
+    # Eğitim
+    'sınav', 'sinav', 'kayıt', 'kayit', 'başvuru', 'basvuru',
+    'üniversite', 'universite', 'bölüm', 'bolum', 'taban puan',
+    'sonuçlar', 'sonuclar', 'ilan', 'duyuru',
+
+    # Genel soru kalıpları
+    'en iyi', 'en ucuz', 'en pahalı', 'en yeni', 'en popüler',
+    'karşılaştır', 'karsilastir', 'hangisi daha iyi', 'hangisi daha',
+    'tavsiye', 'öneri', 'onerisi', 'önerir misin',
+    'nereye gideyim', 'ne yapayım', 'ne izleyeyim', 'ne okuyayım',
+]
+
+
+def needs_web_search(message):
+    msg_lower = message.lower()
+    # Doğrudan trigger varsa
+    if any(k in msg_lower for k in WEB_SEARCH_TRIGGERS):
+        return True
+    # Soru cümlesi + 4 kelimeden uzunsa
+    if is_question(message) and len(message.split()) >= 4:
+        return True
+    return False
+
+
+# ── Spor fonksiyonları ────────────────────────────────────────────────────────
 
 def _get_team_id(team_name, headers):
-    """Takım adından API-Football team ID'si döner."""
     try:
         resp = req_lib.get(
             'https://v3.football.api-sports.io/teams',
@@ -59,7 +177,6 @@ def _format_fixture(fix):
 def get_sports_data(message_lower):
     if not API_FOOTBALL_KEY:
         return None
-
     if not any(t in message_lower for t in SPORT_TRIGGERS):
         return None
 
@@ -68,14 +185,12 @@ def get_sports_data(message_lower):
         'x-rapidapi-key': API_FOOTBALL_KEY,
     }
 
-    # Mesajdaki tüm takımları bul
     found_teams = []
     for team in ALL_TEAM_KEYWORDS:
         if team in message_lower:
             found_teams.append(team)
 
     try:
-        # ── İki takım varsa: aralarındaki maçı bul ───────────────────────────
         if len(found_teams) >= 2:
             team1_id, team1_name = _get_team_id(found_teams[0], headers)
             team2_id, team2_name = _get_team_id(found_teams[1], headers)
@@ -83,7 +198,6 @@ def get_sports_data(message_lower):
             if not team1_id or not team2_id:
                 return None
 
-            # Takım 1'in son 10 maçını çek, içinde takım 2'yi filtrele
             resp = req_lib.get(
                 'https://v3.football.api-sports.io/fixtures',
                 headers=headers,
@@ -94,7 +208,6 @@ def get_sports_data(message_lower):
                 return None
 
             fixtures = resp.json().get('response', [])
-            # Takım 2'nin oynadığı maçları filtrele
             h2h_fixtures = [
                 f for f in fixtures
                 if f['teams']['home']['id'] == team2_id
@@ -107,11 +220,9 @@ def get_sports_data(message_lower):
                     parts.append(_format_fixture(fix))
                 return '\n'.join(parts)
 
-            # H2H bulunamazsa web search'e düş
             print("⚠️ H2H maç bulunamadı, web search'e düşülüyor", flush=True)
             return None
 
-        # ── Tek takım varsa: son + sonraki maçlar ────────────────────────────
         elif len(found_teams) == 1:
             team_id, team_name = _get_team_id(found_teams[0], headers)
             if not team_id:
@@ -144,7 +255,6 @@ def get_sports_data(message_lower):
                 parts.append(_format_fixture(fix))
             return '\n'.join(parts)
 
-        # ── Takım yok ama spor sorusu → Süper Lig son maçlar ─────────────────
         else:
             resp = req_lib.get(
                 'https://v3.football.api-sports.io/fixtures',
@@ -181,7 +291,11 @@ TR_CITIES = [
     'istanbul', 'ankara', 'izmir', 'bursa', 'antalya', 'adana', 'konya',
     'gaziantep', 'mersin', 'kayseri', 'trabzon', 'samsun', 'denizli',
     'eskişehir', 'eskisehir', 'diyarbakır', 'diyarbakir', 'malatya',
-    'erzurum', 'van', 'bodrum', 'muğla', 'mugla', 'fethiye',
+    'erzurum', 'van', 'bodrum', 'muğla', 'mugla', 'fethiye', 'zonguldak',
+    'rize', 'artvin', 'giresun', 'ordu', 'sinop', 'kastamonu', 'bolu',
+    'sakarya', 'kocaeli', 'tekirdağ', 'tekirdag', 'edirne', 'çanakkale',
+    'canakkale', 'balıkesir', 'balikesir', 'manisa', 'afyon', 'kütahya',
+    'kutahya', 'uşak', 'usak', 'aydın', 'aydin', 'muğla', 'burdur', 'isparta',
 ]
 
 
@@ -261,7 +375,6 @@ def get_finance_data(message_lower):
 
     parts = []
 
-    # Döviz
     if is_finance:
         try:
             if EXCHANGERATE_KEY:
@@ -282,7 +395,6 @@ def get_finance_data(message_lower):
         except Exception as e:
             print(f"ExchangeRate error: {e}", flush=True)
 
-    # Kripto
     if is_crypto:
         try:
             words    = re.findall(r'[a-zA-Z0-9]+', message_lower)
@@ -297,7 +409,7 @@ def get_finance_data(message_lower):
                         coin_display[cid] = word.upper()
 
             if not coin_ids:
-                coin_ids    = ['bitcoin', 'ethereum']
+                coin_ids     = ['bitcoin', 'ethereum']
                 coin_display = {'bitcoin': 'Bitcoin', 'ethereum': 'Ethereum'}
 
             resp = req_lib.get(
@@ -329,34 +441,37 @@ def get_finance_data(message_lower):
     return '\n'.join(parts) if parts else None
 
 
-# ── Web search keyword listesi ────────────────────────────────────────────────
+# ── Akıllı query oluşturucu ───────────────────────────────────────────────────
 
-WEB_SEARCH_TRIGGERS = [
-    'haber', 'son dakika', 'güncel', 'bugün ne oldu',
-    'etkinlik', 'konser', 'sergi', 'festival', 'tiyatro',
-    'sinema', 'vizyonda', 'ne zaman', 'nerede', 'açık mı', 'kapalı mı',
-    'yeni çıktı', 'yeni album', 'yeni film', 'yeni sezon',
-    'seçim', 'deprem', 'trafik', 'grev',
-    'altın', 'altin', 'gram altın', 'çeyrek', 'yarım altın',
-    'gümüş', 'gumus', 'petrol',
-    'araştır', 'firma', 'şirket', 'hakkında bilgi',
-    'kimdir', 'nedir', 'telefon', 'adres', 'web sitesi',
-    'en iyi', 'karşılaştır', 'hangisi daha iyi', 'tavsiye',
-]
-
-
-def needs_web_search(message):
-    return any(k in message.lower() for k in WEB_SEARCH_TRIGGERS)
+def _build_search_query(message):
+    """
+    Mesajdan daha iyi bir arama sorgusu oluşturur.
+    Gereksiz kelimeleri atar, Türkçe soru eklerini temizler.
+    """
+    msg = message.strip()
+    # Soru işaretini kaldır
+    msg = msg.rstrip('?').strip()
+    # Çok uzunsa kısalt ama anlamlı bırak
+    words = msg.split()
+    if len(words) > 10:
+        msg = ' '.join(words[:10])
+    return msg
 
 
 # ── Ana router ────────────────────────────────────────────────────────────────
 
 def route_query(message, user_location=None):
     """
-    Öncelik: Sports API → Weather API → Finance API → Web Search → None
-    Sports API sonuç döndüremezse (H2H bulunamadı gibi) web search'e düşer.
+    Öncelik sırası:
+    1. Sports API → başarısızsa web search fallback
+    2. Weather API
+    3. Finance API
+    4. Web search (trigger varsa)
+    5. Soru cümlesi algılanırsa web search
+    6. None — AI kendi bilgisiyle cevaplar
     """
     msg_lower = message.lower()
+    recency   = 'w' if needs_recency(msg_lower) else None
 
     # 1. Spor
     sports_result = get_sports_data(msg_lower)
@@ -364,31 +479,47 @@ def route_query(message, user_location=None):
         print("✅ Router: SPORTS API", flush=True)
         return sports_result, 'sports_api'
 
-    # 2. Spor sorusu ama API sonuç vermediyse → web search'e düş
-    is_sport_question = any(t in msg_lower for t in SPORT_TRIGGERS)
-    if is_sport_question:
-        search_result = web_search(message[:150])
+    # Spor sorusu ama API sonuç vermediyse → web search
+    if any(t in msg_lower for t in SPORT_TRIGGERS):
+        query = _build_search_query(message)
+        search_result = web_search(query, recency='w')
         if search_result:
             print("✅ Router: SPORTS → WEB SEARCH fallback", flush=True)
             return search_result, 'web_search'
 
-    # 3. Hava
+    # 2. Hava
     weather_result = get_weather_data(msg_lower, user_location)
     if weather_result:
         print("✅ Router: WEATHER API", flush=True)
         return weather_result, 'weather_api'
 
-    # 4. Finans
+    # 3. Finans
     finance_result = get_finance_data(msg_lower)
     if finance_result:
         print("✅ Router: FINANCE API", flush=True)
         return finance_result, 'finance_api'
 
-    # 5. Genel web search
+    # 4. Web search (trigger veya soru cümlesi)
     if needs_web_search(message):
-        search_result = web_search(message[:150])
+        query = _build_search_query(message)
+        search_result = web_search(query, recency=recency)
         if search_result:
-            print("✅ Router: WEB SEARCH", flush=True)
+            print(f"✅ Router: WEB SEARCH (recency={recency})", flush=True)
+            return search_result, 'web_search'
+
+        # İlk arama başarısız → farklı query ile tekrar dene
+        fallback_query = ' '.join(message.split()[:6])
+        search_result = web_search(fallback_query, recency=None)
+        if search_result:
+            print("✅ Router: WEB SEARCH (fallback query)", flush=True)
+            return search_result, 'web_search'
+
+    # 5. Son çare — soru cümlesi ama trigger yoksa bile dene
+    if is_question(message) and len(message.split()) >= 3:
+        query = _build_search_query(message)
+        search_result = web_search(query, recency=recency)
+        if search_result:
+            print("✅ Router: WEB SEARCH (question fallback)", flush=True)
             return search_result, 'web_search'
 
     return None, None
