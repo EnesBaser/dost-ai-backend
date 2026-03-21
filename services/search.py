@@ -22,14 +22,28 @@ def fetch_page_content(url, max_chars=2000):
         return None
 
 
-def serper_search(query, num=5):
+def serper_search(query, num=5, recency=None):
+    """
+    recency: 'h' = son 1 saat, 'd' = son 1 gün, 'w' = son 1 hafta,
+             'm' = son 1 ay, 'y' = son 1 yıl, None = filtresiz
+    """
     if not SERPER_API_KEY:
         return None
     try:
+        payload = {
+            'q': query,
+            'num': num,
+            'gl': 'tr',
+            'hl': 'tr',
+        }
+        # Güncellik filtresi — sadece haber/güncel sorgularda kullan
+        if recency:
+            payload['tbs'] = f'qdr:{recency}'
+
         response = req_lib.post(
             'https://google.serper.dev/search',
             headers={'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'},
-            json={'q': query, 'num': num, 'gl': 'tr', 'hl': 'tr'},
+            json=payload,
             timeout=8
         )
         if response.status_code != 200:
@@ -54,8 +68,10 @@ def serper_search(query, num=5):
             title   = r.get('title', '')
             snippet = r.get('snippet', '')
             url     = r.get('link', '')
+            date    = r.get('date', '')
             if title and snippet:
-                parts.append(f"- {title}: {snippet[:250]}")
+                date_str = f" [{date}]" if date else ""
+                parts.append(f"- {title}{date_str}: {snippet[:250]}")
             if not top_url and url:
                 top_url = url
 
@@ -98,10 +114,12 @@ def tavily_search(query, max_results=5):
             parts.append(f"Özet: {answer}")
 
         for r in data.get('results', [])[:3]:
-            title   = r.get('title', '')
-            snippet = r.get('content', '')[:200]
+            title        = r.get('title', '')
+            snippet      = r.get('content', '')[:200]
+            published    = r.get('published_date', '')
             if title and snippet:
-                parts.append(f"- {title}: {snippet}")
+                date_str = f" [{published}]" if published else ""
+                parts.append(f"- {title}{date_str}: {snippet}")
 
         result = '\n'.join(parts)
         return result if result else None
@@ -110,6 +128,6 @@ def tavily_search(query, max_results=5):
         return None
 
 
-def web_search(query):
+def web_search(query, recency=None):
     """Önce Serper, olmazsa Tavily."""
-    return serper_search(query) or tavily_search(query)
+    return serper_search(query, recency=recency) or tavily_search(query)
