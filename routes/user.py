@@ -276,6 +276,41 @@ def admin_panel():
     except FileNotFoundError:
         return "Admin panel not found", 404
 
+@user_bp.route('/api/account/delete', methods=['POST'])
+@require_auth
+def delete_account():
+    """Kullanıcının tüm verilerini ve hesabını sil."""
+    conn = None
+    try:
+        user      = request.user
+        device_id = user.get('device_id') or str(user['id'])
+
+        conn   = get_db()
+        cursor = conn.cursor()
+
+        # Tüm verileri sil
+        cursor.execute("DELETE FROM user_facts WHERE device_id = %s", (device_id,))
+        cursor.execute("DELETE FROM user_emotion_history WHERE device_id = %s", (device_id,))
+        cursor.execute("DELETE FROM messages WHERE user_id = %s", (str(user['id']),))
+        cursor.execute("DELETE FROM usage_stats WHERE user_id = %s", (str(user['id']),))
+        cursor.execute("DELETE FROM user_profiles WHERE user_id = %s", (str(user['id']),))
+        cursor.execute(
+            "UPDATE users SET deleted_at = NOW(), fcm_token = NULL WHERE id = %s",
+            (str(user['id']),)
+        )
+        conn.commit()
+        cursor.close()
+        print(f"✅ Hesap silindi: {user['id']}", flush=True)
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print(f"delete_account error: {e}", flush=True)
+        if conn:
+            conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        release_db(conn)
+
 
 @user_bp.route('/api/subscription/upgrade', methods=['POST'])
 @require_auth
