@@ -131,6 +131,14 @@ def build_system_prompt(user, profile, learned_facts, emotion_history,
         "- Sağlık konularında somut ama abartısız öneriler ver\n"
     )
 
+def _should_create_event(message):
+    keywords = [
+        'ajandama ekle', 'takvime ekle', 'randevu', 'hatırlat',
+        'hatırlatma', 'etkinlik ekle', 'alarm kur', 'remind',
+        'schedule', 'not ekle', 'kayıt al',
+    ]
+    return any(k in message.lower() for k in keywords)
+
 
 def build_web_context(data_result, data_source):
     if not data_result:
