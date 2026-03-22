@@ -260,7 +260,7 @@ def chat():
             model=TIER_LIMITS[effective_tier].get('model', 'gpt-4o-mini'),
             messages=messages,
             functions=FUNCTIONS if use_functions else None,
-            function_call="auto" if use_functions else None,
+            function_call={"name": "create_event"} if (use_functions and _should_create_event(user_message)) else None,
             max_tokens=max_tokens,
             temperature=0.8,
         )
