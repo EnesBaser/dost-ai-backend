@@ -284,7 +284,10 @@ def get_sports_data(message_lower):
 WEATHER_TRIGGERS = [
     'hava', 'sıcaklık', 'sicaklik', 'yağmur', 'yagmur', 'kar',
     'derece', 'nem', 'rüzgar', 'ruzgar', 'bulut', 'güneş', 'gunes',
-    'hava durumu', 'dışarısı', 'disarisi', 'soğuk', 'soguk', 'sıcak', 'sicak',
+    'hava durumu', 'dışarısı', 'disarisi', 'soğuk', 'soguk', 'sıcak', 'sicak','soğuk mu', 'soguk mu', 'sıcak mı', 'sicak mi',
+    'mont giysem mi', 'şemsiye', 'semsiye', 'yağış', 'yagis',
+    'don', 'buzlanma', 'sis', 'hava nasıl', 'hava nasil',
+    'dışarı çıksam', 'disari ciksam',
 ]
 
 TR_CITIES = [
