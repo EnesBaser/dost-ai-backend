@@ -131,12 +131,24 @@ WEB_SEARCH_TRIGGERS = [
 
 def needs_web_search(message):
     msg_lower = message.lower()
-    # Doğrudan trigger varsa
+
+    # Kesin web search triggerları
     if any(k in msg_lower for k in WEB_SEARCH_TRIGGERS):
         return True
-    # Soru cümlesi + 4 kelimeden uzunsa
-    if is_question(message) and len(message.split()) >= 4:
+
+    # Genel bilgi talepleri — kelime listesine gerek kalmadan
+    info_triggers = [
+        'hakkında', 'hakkinda', 'bilgi', 'anlat', 'açıkla', 'acikla',
+        'nedir', 'kimdir', 'listesi', 'liste', 'sırala', 'sirala',
+        'kaçtır', 'kactir', 'hangisi', 'nasıl', 'nasil',
+    ]
+    if any(k in msg_lower for k in info_triggers):
         return True
+
+    # Soru cümlesi + 3 kelimeden uzunsa → her zaman dene
+    if is_question(message) and len(message.split()) >= 3:
+        return True
+
     return False
 
 
@@ -284,7 +296,8 @@ def get_sports_data(message_lower):
 WEATHER_TRIGGERS = [
     'hava', 'sıcaklık', 'sicaklik', 'yağmur', 'yagmur', 'kar',
     'derece', 'nem', 'rüzgar', 'ruzgar', 'bulut', 'güneş', 'gunes',
-    'hava durumu', 'dışarısı', 'disarisi', 'soğuk', 'soguk', 'sıcak', 'sicak','soğuk mu', 'soguk mu', 'sıcak mı', 'sicak mi',
+    'hava durumu', 'dışarısı', 'disarisi', 'soğuk', 'soguk', 'sıcak', 'sicak',
+    'soğuk mu', 'soguk mu', 'sıcak mı', 'sicak mi',
     'mont giysem mi', 'şemsiye', 'semsiye', 'yağış', 'yagis',
     'don', 'buzlanma', 'sis', 'hava nasıl', 'hava nasil',
     'dışarı çıksam', 'disari ciksam',
@@ -331,9 +344,23 @@ def get_weather_data(message_lower, user_location=None):
         wind      = round(data['wind']['speed'] * 3.6)
         city_name = data['name']
 
+        if temp <= 5:
+            advice = "❄️ Çok soğuk, kalın mont şart!"
+        elif temp <= 12:
+            advice = "🧥 Serin, mont veya kaban giyin."
+        elif temp <= 18:
+            advice = "🌤 Hafif serin, bir hırka yeter."
+        elif temp <= 25:
+            advice = "😊 Güzel hava, rahat giyinin."
+        else:
+            advice = "☀️ Sıcak, ince giyin ve su için!"
+
         return (
-            f"🌤 {city_name} hava durumu: {temp}°C (hissedilen {feels}°C), "
-            f"{desc}, nem %{humidity}, rüzgar {wind} km/s"
+            f"🌤 {city_name} hava durumu:\n"
+            f"🌡 {temp}°C (hissedilen {feels}°C)\n"
+            f"☁️ {desc}\n"
+            f"💧 Nem %{humidity} | 💨 Rüzgar {wind} km/s\n"
+            f"{advice}"
         )
     except Exception as e:
         print(f"OpenWeatherMap error: {e}", flush=True)
